@@ -305,7 +305,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
                     SizedBox(height: 24),
 
-                    // Score saving status
+                    // Guadar puntuacion
                     if (_isSavingScore)
                       Container(
                         width: double.infinity,
@@ -382,7 +382,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         ),
                       ),
 
-                    // Análisis por categorías
+                    // Analisis por categorías
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(24),
@@ -458,7 +458,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
                     SizedBox(height: 24),
 
-                    // Estadísticas adicionales
+                    // Estadisticas adicionales
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(24),
@@ -497,7 +497,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
                     SizedBox(height: 32),
 
-                    // Botones de acción
+                    // Botones de accion
                     Column(
                       children: [
                         _buildActionButton(

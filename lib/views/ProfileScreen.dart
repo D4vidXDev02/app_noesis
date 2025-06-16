@@ -679,7 +679,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Helper methods for level styling
+  // Metodos auxiliar para el estilo de nivel
   Color _getLevelColor(String nivel) {
     switch (nivel.toLowerCase()) {
       case 'avanzado':

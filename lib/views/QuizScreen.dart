@@ -293,7 +293,7 @@ class _QuizScreenState extends State<QuizScreen> {
                                 buttonColor = isCorrect ? Colors.green : Colors.red;
                                 borderColor = isCorrect ? Colors.green : Colors.red;
                               } else if (showFeedback && option == question.correctAnswer) {
-                                // Mostrar la respuesta correcta si el usuario se equivocó
+                                // Mostrar la respuesta correcta si el user se equivoco
                                 buttonColor = Colors.green;
                                 borderColor = Colors.green;
                               } else {
@@ -357,7 +357,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
                             SizedBox(height: 20),
 
-                            // Feedback visual de respuestas - MEJORADO
+                            // Feedback visual de respuestas
                             if (showFeedback)
                               Container(
                                 width: double.infinity,
@@ -445,7 +445,7 @@ class _QuizScreenState extends State<QuizScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Cerrar diálogo
+                Navigator.of(context).pop(); // Cerrar dialogo
               },
               child: Text(
                 'Continuar',
@@ -459,7 +459,7 @@ class _QuizScreenState extends State<QuizScreen> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Cerrar diálogo
+                Navigator.of(context).pop(); // Cerrar dialogo
                 Navigator.of(context).pop(); // Salir del quiz
               },
               child: Text(
