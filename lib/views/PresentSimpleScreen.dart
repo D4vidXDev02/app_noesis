@@ -128,7 +128,7 @@ class _PresentSimpleScreenState extends State<PresentSimpleScreen> {
           children: [
             Center(
               child: Image.asset(
-                '../assets/present_simple_pizarra.png',
+                'assets/present_simple_pizarra.png',
                 width: 300,
               ),
             ),
@@ -158,7 +158,7 @@ class _PresentSimpleScreenState extends State<PresentSimpleScreen> {
               ),
               child: Center(
                 child: Image.asset(
-                  '../assets/present_simple_tabla.png',
+                  'assets/present_simple_tabla.png',
                   width: 300,
                 ),
               ),

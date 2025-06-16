@@ -5,6 +5,7 @@ class Lesson {
   final String screenRoute;
   bool isFavorite;
 
+  // Constructor para inicializar una lección
   Lesson({
     required this.id,
     required this.name,
@@ -13,7 +14,7 @@ class Lesson {
     this.isFavorite = false,
   });
 
-  // Convertir de JSON
+  // Metodo factory para crear una lección a partir de un JSON
   factory Lesson.fromJson(Map<String, dynamic> json) {
     return Lesson(
       id: json['clase_id'] ?? json['id'],

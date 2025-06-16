@@ -5,6 +5,7 @@ import 'viewmodels/signup_viewmodel.dart';
 import 'views/LoginScreen.dart';
 import 'views/MenuScreen.dart';
 import 'views/LogupScreen.dart';
+import 'viewmodels/profile_viewmodel.dart';
 
 void main() {
   runApp(
@@ -12,6 +13,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
+        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
       ],
       child: MyApp(),
     ),

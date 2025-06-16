@@ -18,6 +18,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  provider:
+  flutter_launcher_icons: ^0.13.1
+  rename: ^3.0.2
+
 
 flutter:
   uses-material-design: true
@@ -30,8 +34,17 @@ flutter:
     - assets/present_simple.png
     - assets/verb_can.png
     - assets/logo_noesis.png
+    - assets/logo_log.png
+    - assets/logo_noesis_game.png
     - assets/verbo_to_be_pizarra.png
     - assets/verbo_to_be_tabla.png
+    - assets/future_perfect_pizarra.png
+    - assets/future_perfect_tabla.png
+    - assets/present_simple_pizarra.png
+    - assets/present_simple_tabla.png
+    - assets/the_verb_can_pizarra.png
+    - assets/the_verb_can_tabla.png
+    - assets/icon/icon.png
     - assets/audios/She_is_a_doctor.mp3
     - assets/audios/The_sky_is_blue.mp3
     - assets/audios/I_am_happy_today.mp3
@@ -49,8 +62,13 @@ flutter:
     - assets/audios/We_can_help.mp3
     - assets/audios/They_can_come.mp3
 
-
   fonts:
     - family: Nunito
       fonts:
         - asset: assets/fonts/Nunito-SemiBold.ttf
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21

@@ -11,22 +11,22 @@ class UserSessionService {
   String? get currentUsername => _currentUsername;
   bool get isLoggedIn => _currentUserEmail != null;
 
-  // Metodo estático para obtener el email del usuario actual
+  // Obtener el email del usuario actual
   static Future<String?> getCurrentUserEmail() async {
     return _instance._currentUserEmail;
   }
 
-  // Metodo estático para obtener el username del usuario actual
+  // Obtener el username del usuario actual
   static Future<String?> getCurrentUsername() async {
     return _instance._currentUsername;
   }
 
-  // Metodo estático para verificar si hay un usuario logueado
+  // Verificar si hay un usuario logueado
   static Future<bool> isUserLoggedIn() async {
     return _instance._currentUserEmail != null;
   }
 
-  // Metodo para establecer el usuario logueado
+  // Establecer el usuario logueado
   void setCurrentUser(String email) {
     _currentUserEmail = email;
     _currentUsername = _extractUsernameFromEmail(email);
@@ -43,7 +43,7 @@ class UserSessionService {
     _instance.logout();
   }
 
-  // Extrae el username del email (parte antes del @)
+  // Extraer el username del email (parte antes del @)
   String _extractUsernameFromEmail(String email) {
     return email.split('@')[0];
   }

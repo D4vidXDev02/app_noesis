@@ -63,9 +63,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: EdgeInsets.zero,
                 children: <Widget>[
                   DrawerHeader(
-                    decoration: BoxDecoration(color: Colors.orange),
-                    child: Text('Menu',
-                        style: TextStyle(color: Colors.white, fontSize: 24)),
+                    decoration: BoxDecoration(color: Color(0xFFC96B0D)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Menu',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontFamily: 'Nunito',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.person,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                viewModel.userEmail ?? 'No hay usuario',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontFamily: 'Nunito',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                   ListTile(
                     leading: Icon(Icons.home),
@@ -256,52 +293,107 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   SizedBox(height: 32),
 
-                  // Sección de puntaje
+                  // Sección de puntaje mejorada
                   Row(
                     children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'Mejor',
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                SizedBox(width: 4),
+                                if (viewModel.isLoadingScore)
+                                  SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00BCD4)),
+                                    ),
+                                  ),
+                              ],
+                            ),
                             Text(
-                              'Puntaje',
+                              'puntaje',
                               style: TextStyle(
                                 fontFamily: 'Nunito',
-                                fontSize: 24,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
                             ),
-                            Text(
-                              'obtenido',
-                              style: TextStyle(
-                                fontFamily: 'Nunito',
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                            SizedBox(height: 8),
+                            // Badge del nivel
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _getLevelColor(viewModel.nivel),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                viewModel.nivel,
+                                style: TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                            SizedBox(height: 16),
-                            Text(
-                              '${viewModel.puntajeObtenido}/${viewModel.puntajeTotal}',
-                              style: TextStyle(
-                                fontFamily: 'Odibee Sans',
-                                fontSize: 64,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                            SizedBox(height: 12),
+                            // Puntaje principal
+                            if (!viewModel.isLoadingScore)
+                              Text(
+                                '${viewModel.puntajeObtenido}/${viewModel.puntajeTotal}',
+                                style: TextStyle(
+                                  fontFamily: 'Odibee Sans',
+                                  fontSize: 46,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              )
+                            else
+                              Container(
+                                width: 120,
+                                height: 64,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00BCD4)),
+                                  ),
+                                ),
                               ),
-                            ),
+                            // Porcentaje
+                            if (!viewModel.isLoadingScore && viewModel.puntajeTotal > 0)
+                              Text(
+                                '${((viewModel.puntajeObtenido / viewModel.puntajeTotal) * 100).round()}%',
+                                style: TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: _getLevelColor(viewModel.nivel),
+                                ),
+                              ),
                           ],
                         ),
                       ),
 
-                      // Iconos de gamificación
+                      // Iconos de gamificación mejorados
                       Container(
                         width: 120,
                         height: 120,
                         child: Stack(
                           children: [
-                            // Trofeo principal
+                            // Trofeo principal - cambia según el nivel
                             Positioned(
                               top: 10,
                               left: 30,
@@ -309,80 +401,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 width: 40,
                                 height: 50,
                                 decoration: BoxDecoration(
-                                  color: Color(0xFFFFC107),
+                                  color: _getLevelColor(viewModel.nivel),
                                   borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: _getLevelColor(viewModel.nivel).withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
                                 child: Icon(
-                                  Icons.emoji_events,
+                                  _getLevelIcon(viewModel.nivel),
                                   color: Colors.white,
                                   size: 24,
                                 ),
                               ),
                             ),
-                            // Medalla roja
+                            // Resto de iconos decorativos...
                             Positioned(
-                              top: 5,
-                              right: 15,
+                              top: 0,
+                              right: 20,
                               child: Container(
-                                width: 30,
-                                height: 35,
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFE53935),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Icon(
-                                  Icons.military_tech,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                            // Diana/Target
-                            Positioned(
-                              bottom: 15,
-                              left: 10,
-                              child: Container(
-                                width: 35,
-                                height: 35,
+                                width: 20,
+                                height: 20,
                                 decoration: BoxDecoration(
                                   color: Color(0xFF4CAF50),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                  Icons.gps_fixed,
+                                  Icons.star,
                                   color: Colors.white,
-                                  size: 20,
+                                  size: 12,
                                 ),
                               ),
                             ),
-                            // Estrella
                             Positioned(
-                              bottom: 25,
-                              right: 20,
+                              bottom: 20,
+                              left: 10,
                               child: Container(
-                                width: 25,
-                                height: 25,
+                                width: 24,
+                                height: 24,
                                 decoration: BoxDecoration(
-                                  color: Color(0xFFFFC107),
+                                  color: Color(0xFF2196F3),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                  Icons.star,
+                                  Icons.trending_up,
                                   color: Colors.white,
-                                  size: 15,
-                                ),
-                              ),
-                            ),
-                            // Elemento decorativo
-                            Positioned(
-                              bottom: 40,
-                              right: 35,
-                              child: Container(
-                                width: 20,
-                                height: 20,
-                                decoration: BoxDecoration(
-                                  color: Color(0xFF9C27B0),
-                                  borderRadius: BorderRadius.circular(4),
+                                  size: 14,
                                 ),
                               ),
                             ),
@@ -405,69 +472,134 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   SizedBox(height: 16),
 
-                  // Card de la clase más recurrida
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        // Icono de la clase
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFF3E5F5),
-                            borderRadius: BorderRadius.circular(12),
+                  // Card de la clase más recurrida con estado de carga
+                  Center(
+                    child: viewModel.isLoadingMostVisited
+                        ? Container(
+                      constraints: BoxConstraints(maxWidth: 350),
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
                           ),
-                          child: Stack(
-                            children: [
-                              Center(
-                                child: Icon(
-                                  Icons.menu_book,
-                                  color: Color(0xFF9C27B0),
-                                  size: 30,
-                                ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          // Placeholder para icono
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.grey,
+                                strokeWidth: 2,
                               ),
-                              Positioned(
-                                top: 8,
-                                right: 8,
-                                child: Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFF4CAF50),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 16),
-
-                        // Texto de la clase
-                        Expanded(
-                          child: Text(
-                            viewModel.claseMasRecurrida,
-                            style: TextStyle(
-                              fontFamily: 'Nunito',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
                             ),
                           ),
-                        ),
-                      ],
+                          SizedBox(width: 16),
+                          // Texto de carga
+                          Expanded(
+                            child: Text(
+                              'Cargando clase más visitada...',
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                        : Container(
+                      constraints: BoxConstraints(maxWidth: 350),
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          // Icono de la clase
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: viewModel.claseMasRecurrida.startsWith('Ninguna') ||
+                                  viewModel.claseMasRecurrida.startsWith('Error')
+                                  ? Color(0xFFFFEBEE)
+                                  : Color(0xFFF3E5F5),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Stack(
+                              children: [
+                                Center(
+                                  child: Icon(
+                                    viewModel.claseMasRecurrida.startsWith('Ninguna') ||
+                                        viewModel.claseMasRecurrida.startsWith('Error')
+                                        ? Icons.info_outline
+                                        : Icons.menu_book,
+                                    color: viewModel.claseMasRecurrida.startsWith('Ninguna') ||
+                                        viewModel.claseMasRecurrida.startsWith('Error')
+                                        ? Colors.grey[600]
+                                        : Color(0xFF9C27B0),
+                                    size: 30,
+                                  ),
+                                ),
+                                if (!viewModel.claseMasRecurrida.startsWith('Ninguna') &&
+                                    !viewModel.claseMasRecurrida.startsWith('Error'))
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFF4CAF50),
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 16),
+
+                          // Texto de la clase
+                          Expanded(
+                            child: Text(
+                              viewModel.claseMasRecurrida,
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: viewModel.claseMasRecurrida.startsWith('Ninguna') ||
+                                    viewModel.claseMasRecurrida.startsWith('Error')
+                                    ? Colors.grey[600]
+                                    : Colors.black,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
@@ -545,5 +677,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       },
     );
+  }
+
+  // Helper methods for level styling
+  Color _getLevelColor(String nivel) {
+    switch (nivel.toLowerCase()) {
+      case 'avanzado':
+        return Color(0xFFFF6B35); // Naranja para avanzado
+      case 'intermedio':
+        return Color(0xFF2196F3); // Azul para intermedio
+      case 'básico':
+      default:
+        return Color(0xFF4CAF50); // Verde para básico
+    }
+  }
+
+  IconData _getLevelIcon(String nivel) {
+    switch (nivel.toLowerCase()) {
+      case 'avanzado':
+        return Icons.emoji_events; // Trofeo para avanzado
+      case 'intermedio':
+        return Icons.school; // Educación para intermedio
+      case 'básico':
+      default:
+        return Icons.star; // Estrella para básico
+    }
   }
 }

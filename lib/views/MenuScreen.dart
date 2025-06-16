@@ -9,6 +9,7 @@ import 'ProfileScreen.dart';
 import '../services/favorites_service.dart';
 import '../services/user_session_service.dart';
 import '../models/lesson.dart';
+import '../services/visits_service.dart';
 
 class MenuScreen extends StatefulWidget {
   @override
@@ -20,6 +21,10 @@ class _MenuScreenState extends State<MenuScreen> {
   int currentBottomNavIndex = 0;
   bool isLoadingFavorites = false;
   String? currentUserEmail;
+
+  // Controlador para el campo de búsqueda
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   // Lista de lecciones disponibles
   final List<Lesson> availableLessons = [
@@ -49,10 +54,34 @@ class _MenuScreenState extends State<MenuScreen> {
     ),
   ];
 
+  // Lista filtrada de lecciones
+  List<Lesson> get filteredLessons {
+    if (_searchQuery.isEmpty) {
+      return availableLessons;
+    }
+
+    return availableLessons.where((lesson) {
+      return lesson.name.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+  }
+
   @override
   void initState() {
     super.initState();
     _loadUserSession();
+
+    // Agregar listener al controlador de búsqueda
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserSession() async {
@@ -215,15 +244,59 @@ class _MenuScreenState extends State<MenuScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Obtener información de la pantalla
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    final isTablet = screenWidth > 600;
+    final crossAxisCount = isTablet ? 3 : 2;
+
     return Scaffold(
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              decoration: BoxDecoration(color: Colors.orange),
-              child: Text('Menu',
-                  style: TextStyle(color: Colors.white, fontSize: 24)),
+              decoration: BoxDecoration(color: Color(0xFFC96B0D)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Menu',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontFamily: 'Nunito',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          currentUserEmail ?? 'No hay usuario',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'Nunito',
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             ListTile(
               leading: Icon(Icons.home),
@@ -280,181 +353,245 @@ class _MenuScreenState extends State<MenuScreen> {
         ),
       ),
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'What class do you \nwant to learn?',
-              style: TextStyle(
-                fontFamily: 'Nunito',
-                fontWeight: FontWeight.w600,
-                fontSize: 24,
-              ),
-            ),
-            SizedBox(height: 16),
-            // Campo de búsqueda
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Search...',
-                hintStyle: TextStyle(
-                  color: Color(0xFF878787),
-                  fontSize: 16,
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Color(0xFF878787),
-                  size: 24,
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 16,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(
-                    color: Colors.black.withOpacity(0.2),
-                    width: 1.0,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(
-                    color: Colors.black.withOpacity(0.2),
-                    width: 1.0,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(
-                    color: Colors.black.withOpacity(0.3),
-                    width: 1.0,
-                  ),
-                ),
-              ),
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-              ),
-              cursorColor: Color(0xFF878787),
-            ),
-            SizedBox(height: 20),
-
-            // Filtro para cambiar entre "Class" y "Game"
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: screenHeight -
+                MediaQuery.of(context).padding.top -
+                kToolbarHeight -
+                kBottomNavigationBarHeight,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                GestureDetector(
-                  onTap: () => setState(() => isClassSelected = true),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Class',
-                        style: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontWeight: FontWeight.w900,
-                          fontSize: 22,
-                          color: isClassSelected ? Color(0xFFFF0000) : Colors.black,
-                        ),
-                      ),
-                      if (isClassSelected)
-                        Container(
-                          height: 3,
-                          width: 40,
-                          color: Color(0xFFFF0000),
-                          margin: EdgeInsets.only(top: 4),
-                        )
-                    ],
+                Text(
+                  'What class do you \nwant to learn?',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontWeight: FontWeight.w600,
+                    fontSize: isTablet ? 28 : 24,
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => setState(() => isClassSelected = false),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Game',
-                        style: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontWeight: FontWeight.w900,
-                          fontSize: 22,
-                          color: !isClassSelected ? Color(0xFFFF0000) : Colors.black,
-                        ),
+                SizedBox(height: 16),
+                // Campo de búsqueda con funcionalidad
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search...',
+                    hintStyle: TextStyle(
+                      color: Color(0xFF878787),
+                      fontSize: 16,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Color(0xFF878787),
+                      size: 24,
+                    ),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                      icon: Icon(
+                        Icons.clear,
+                        color: Color(0xFF878787),
                       ),
-                      if (!isClassSelected)
-                        Container(
-                          height: 3,
-                          width: 40,
-                          color: Color(0xFFFF0000),
-                          margin: EdgeInsets.only(top: 4),
-                        )
-                    ],
+                      onPressed: () {
+                        _searchController.clear();
+                      },
+                    )
+                        : null,
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(
+                        color: Colors.black.withOpacity(0.2),
+                        width: 1.0,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(
+                        color: Colors.black.withOpacity(0.2),
+                        width: 1.0,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(
+                        color: Colors.black.withOpacity(0.3),
+                        width: 1.0,
+                      ),
+                    ),
                   ),
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                  ),
+                  cursorColor: Color(0xFF878787),
                 ),
-              ],
-            ),
-            SizedBox(height: 20),
+                SizedBox(height: 20),
 
-            // Contenido principal
-            if (isClassSelected)
-              Expanded(
-                child: isLoadingFavorites
-                    ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(color: Colors.red),
-                      SizedBox(height: 16),
-                      Text('Cargando favoritos...'),
-                    ],
-                  ),
-                )
-                    : GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 186 / 201,
-                  ),
-                  itemCount: availableLessons.length,
-                  itemBuilder: (context, index) {
-                    final lesson = availableLessons[index];
-                    return _buildLessonCard(lesson);
-                  },
+                // Filtro para cambiar entre "Class" y "Game"
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    GestureDetector(
+                      onTap: () => setState(() => isClassSelected = true),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Class',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.w900,
+                              fontSize: isTablet ? 26 : 22,
+                              color: isClassSelected ? Color(0xFFFF0000) : Colors.black,
+                            ),
+                          ),
+                          if (isClassSelected)
+                            Container(
+                              height: 3,
+                              width: 40,
+                              color: Color(0xFFFF0000),
+                              margin: EdgeInsets.only(top: 4),
+                            )
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => setState(() => isClassSelected = false),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Game',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.w900,
+                              fontSize: isTablet ? 26 : 22,
+                              color: !isClassSelected ? Color(0xFFFF0000) : Colors.black,
+                            ),
+                          ),
+                          if (!isClassSelected)
+                            Container(
+                              height: 3,
+                              width: 40,
+                              color: Color(0xFFFF0000),
+                              margin: EdgeInsets.only(top: 4),
+                            )
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            if (!isClassSelected)
-              Expanded(
-                child: Center(
-                  child: ElevatedButton.icon(
-                    icon: Icon(Icons.play_arrow),
-                    label: Text(
-                      'Start Game',
-                      style: TextStyle(
-                        fontFamily: 'Nunito',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                SizedBox(height: 20),
+
+                // Contenido principal
+                if (isClassSelected)
+                  isLoadingFavorites
+                      ? Container(
+                    height: 300,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(color: Colors.red),
+                          SizedBox(height: 16),
+                          Text('Cargando favoritos...'),
+                        ],
                       ),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                  )
+                      : filteredLessons.isEmpty && _searchQuery.isNotEmpty
+                      ? Container(
+                    height: 300,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'No se encontraron resultados',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey[600],
+                              fontFamily: 'Nunito',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Intenta con otro término de búsqueda',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[500],
+                              fontFamily: 'Nunito',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => QuizScreen()),
-                      );
+                  )
+                      : GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: isTablet ? 1.1 : 186 / 201,
+                    ),
+                    itemCount: filteredLessons.length,
+                    itemBuilder: (context, index) {
+                      final lesson = filteredLessons[index];
+                      return _buildLessonCard(lesson, isTablet);
                     },
                   ),
-                ),
-              ),
-          ],
+                if (!isClassSelected)
+                  Container(
+                    height: 300,
+                    child: Center(
+                      child: ElevatedButton.icon(
+                        icon: Icon(Icons.play_arrow),
+                        label: Text(
+                          'Start Game',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontWeight: FontWeight.bold,
+                            fontSize: isTablet ? 24 : 20,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: isTablet ? 40 : 32,
+                              vertical: isTablet ? 20 : 16
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => QuizScreen()),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -496,12 +633,15 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 
-  Widget _buildLessonCard(Lesson lesson) {
+  Widget _buildLessonCard(Lesson lesson, bool isTablet) {
+    final cardWidth = isTablet ? 220.0 : 186.0;
+    final cardHeight = isTablet ? 240.0 : 201.0;
+
     return GestureDetector(
       onTap: () => _navigateToLessonScreen(lesson),
       child: Container(
-        width: 186,
-        height: 201,
+        width: cardWidth,
+        height: cardHeight,
         child: Stack(
           children: [
             // Imagen de fondo con bordes redondeados
@@ -517,8 +657,6 @@ class _MenuScreenState extends State<MenuScreen> {
               ),
             ),
 
-
-
             // Botón de favorito
             Positioned(
               top: 8,
@@ -526,7 +664,7 @@ class _MenuScreenState extends State<MenuScreen> {
               child: GestureDetector(
                 onTap: () => _toggleFavorite(lesson),
                 child: Container(
-                  padding: EdgeInsets.all(6),
+                  padding: EdgeInsets.all(isTablet ? 8 : 6),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.9),
                     shape: BoxShape.circle,
@@ -541,7 +679,7 @@ class _MenuScreenState extends State<MenuScreen> {
                   child: Icon(
                     lesson.isFavorite ? Icons.favorite : Icons.favorite_border,
                     color: lesson.isFavorite ? Colors.red : Colors.grey[600],
-                    size: 20,
+                    size: isTablet ? 24 : 20,
                   ),
                 ),
               ),
@@ -551,7 +689,17 @@ class _MenuScreenState extends State<MenuScreen> {
       ),
     );
   }
-  void _navigateToLessonScreen(Lesson lesson) {
+
+  Future<void> _navigateToLessonScreen(Lesson lesson) async {
+    // Registrar la visita si hay usuario logueado
+    if (currentUserEmail != null) {
+      try {
+        await VisitsService.registerVisit(currentUserEmail!, lesson.id);
+      } catch (e) {
+        print('Error registering visit: $e');
+      }
+    }
+
     Widget screen;
 
     switch (lesson.id) {

@@ -79,9 +79,48 @@ class _QuizScreenState extends State<QuizScreen> {
   // Metodo para calcular el porcentaje de progreso
   double get progressPercentage => (viewModel.currentIndex + 1) / viewModel.questions.length;
 
+  // Método para obtener dimensiones responsivas
+  double _getResponsiveWidth(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth > 600) {
+      // Tablets
+      return screenWidth * 0.7;
+    } else if (screenWidth > 400) {
+      // Móviles grandes
+      return screenWidth * 0.9;
+    } else {
+      // Móviles pequeños
+      return screenWidth * 0.95;
+    }
+  }
+
+  double _getResponsiveFontSize(BuildContext context, double baseFontSize) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth > 600) {
+      return baseFontSize * 1.2;
+    } else if (screenWidth < 350) {
+      return baseFontSize * 0.9;
+    }
+    return baseFontSize;
+  }
+
+  double _getResponsivePadding(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth > 600) {
+      return 24.0;
+    } else if (screenWidth < 350) {
+      return 12.0;
+    }
+    return 16.0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final question = viewModel.currentQuestion;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final responsivePadding = _getResponsivePadding(context);
+    final maxWidth = _getResponsiveWidth(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -90,8 +129,8 @@ class _QuizScreenState extends State<QuizScreen> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Image.asset(
-              'assets/logo_noesis.png',
-              height: 40,
+              'assets/logo_noesis_game.png',
+              height: screenWidth > 600 ? 50 : 40,
             ),
           ],
         ),
@@ -106,230 +145,269 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
       backgroundColor: Color(0xFF353535),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Barra de progreso
-            Container(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Pregunta ${viewModel.currentIndex + 1} de ${viewModel.questions.length}',
-                        style: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontSize: 16,
-                          color: Color(0xFF9E9E9E),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        '${(progressPercentage * 100).toInt()}%',
-                        style: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontSize: 16,
-                          color: Color(0xFF00BCD4),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: progressPercentage,
-                    backgroundColor: Color(0xFF4A4A4A),
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00BCD4)),
-                    minHeight: 6,
-                  ),
-                ],
-              ),
-            ),
-
-            // Contenido principal con scroll
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Column(
+              children: [
+                // Barra de progreso
+                Container(
+                  padding: EdgeInsets.all(responsivePadding),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Título del juego
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Test Game ',
-                            style: TextStyle(
-                              fontFamily: 'Orbitron',
-                              fontSize: 24,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            '🎮',
-                            style: TextStyle(fontSize: 24),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: 20),
-
-                      // Estadísticas rápidas
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF2A2A2A),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.check_circle, color: Colors.green, size: 16),
-                            SizedBox(width: 4),
-                            Text(
-                              '$correctAnswersCount correctas',
+                          Flexible(
+                            child: Text(
+                              'Pregunta ${viewModel.currentIndex + 1} de ${viewModel.questions.length}',
                               style: TextStyle(
                                 fontFamily: 'Nunito',
-                                fontSize: 14,
-                                color: Colors.green,
+                                fontSize: _getResponsiveFontSize(context, 16),
+                                color: Color(0xFF9E9E9E),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: 20),
-
-                      Container(
-                        width: double.infinity,
-                        child: Text(
-                          question.question,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
                           ),
-                        ),
-                      ),
-
-                      SizedBox(height: 24),
-
-                      // Opciones de respuesta
-                      ...question.options.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        String option = entry.value;
-                        String prefix = String.fromCharCode(65 + index); // A, B, C, D
-
-                        Color buttonColor;
-                        Color borderColor = Colors.transparent;
-
-                        if (showFeedback && selectedAnswer == option) {
-                          buttonColor = isCorrect ? Colors.green : Colors.red;
-                          borderColor = isCorrect ? Colors.green : Colors.red;
-                        } else if (showFeedback && option == question.correctAnswer) {
-                          // Mostrar la respuesta correcta si el usuario se equivocó
-                          buttonColor = Colors.green;
-                          borderColor = Colors.green;
-                        } else {
-                          buttonColor = Color(0xFF9E9E9E);
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6.0),
-                          child: Container(
-                            width: double.infinity,
-                            constraints: BoxConstraints(
-                              maxWidth: 339,
-                              minHeight: 80,
+                          Text(
+                            '${(progressPercentage * 100).toInt()}%',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              fontSize: _getResponsiveFontSize(context, 16),
+                              color: Color(0xFF00BCD4),
+                              fontWeight: FontWeight.w600,
                             ),
-                            child: ElevatedButton(
-                              onPressed: selectedAnswer == null && !showFeedback
-                                  ? () => _submitAnswer(option)
-                                  : null,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: buttonColor,
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 16,
-                                    horizontal: 20
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                  side: BorderSide(
-                                    color: borderColor,
-                                    width: 2,
-                                  ),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '$prefix) ',
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: progressPercentage,
+                        backgroundColor: Color(0xFF4A4A4A),
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00BCD4)),
+                        minHeight: 6,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Contenido principal con scroll
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(horizontal: responsivePadding),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: maxWidth,
+                          minHeight: constraints.maxHeight - 120,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 20),
+
+                            // Título del juego
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    'Test Game ',
                                     style: TextStyle(
-                                      fontFamily: 'Nunito',
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Orbitron',
+                                      fontSize: _getResponsiveFontSize(context, 24),
+                                      fontWeight: FontWeight.w600,
                                       color: Colors.white,
                                     ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  Expanded(
-                                    child: Text(
-                                      option,
-                                      style: TextStyle(
-                                        fontFamily: 'Nunito',
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                                ),
+                                Text(
+                                  '🎮',
+                                  style: TextStyle(fontSize: _getResponsiveFontSize(context, 24)),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 20),
+
+                            // Estadísticas rápidas
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: responsivePadding,
+                                  vertical: 8
+                              ),
+                              decoration: BoxDecoration(
+                                color: Color(0xFF2A2A2A),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.check_circle, color: Colors.green, size: 16),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    '$correctAnswersCount correctas',
+                                    style: TextStyle(
+                                      fontFamily: 'Nunito',
+                                      fontSize: _getResponsiveFontSize(context, 14),
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ),
-                        );
-                      }).toList(),
 
-                      SizedBox(height: 16),
+                            SizedBox(height: 30),
 
-                      // Feedback visual de rptas
-                      if (showFeedback)
-                        Container(
-                          padding: EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: isCorrect
-                                ? Colors.green.withOpacity(0.2)
-                                : Colors.red.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isCorrect ? Colors.green : Colors.red,
-                              width: 1,
+                            // Pregunta
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              child: Text(
+                                question.question,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Nunito',
+                                  fontSize: _getResponsiveFontSize(context, 20),
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  height: 1.3,
+                                ),
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            isCorrect ? '¡Correcto! ✓' : '¡Incorrecto! ✗',
-                            style: TextStyle(
-                              color: isCorrect ? Colors.green : Colors.red,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Nunito',
-                            ),
-                          ),
+
+                            SizedBox(height: 30),
+
+                            // Opciones de respuesta
+                            ...question.options.asMap().entries.map((entry) {
+                              int index = entry.key;
+                              String option = entry.value;
+                              String prefix = String.fromCharCode(65 + index); // A, B, C, D
+
+                              Color buttonColor;
+                              Color borderColor = Colors.transparent;
+
+                              if (showFeedback && selectedAnswer == option) {
+                                buttonColor = isCorrect ? Colors.green : Colors.red;
+                                borderColor = isCorrect ? Colors.green : Colors.red;
+                              } else if (showFeedback && option == question.correctAnswer) {
+                                // Mostrar la respuesta correcta si el usuario se equivocó
+                                buttonColor = Colors.green;
+                                borderColor = Colors.green;
+                              } else {
+                                buttonColor = Color(0xFF9E9E9E);
+                              }
+
+                              return Padding(
+                                padding: EdgeInsets.symmetric(vertical: 6.0),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: selectedAnswer == null && !showFeedback
+                                        ? () => _submitAnswer(option)
+                                        : null,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: buttonColor,
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: screenWidth > 600 ? 20 : 16,
+                                          horizontal: responsivePadding
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30),
+                                        side: BorderSide(
+                                          color: borderColor,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          '$prefix) ',
+                                          style: TextStyle(
+                                            fontFamily: 'Nunito',
+                                            fontSize: _getResponsiveFontSize(context, 18),
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            option,
+                                            style: TextStyle(
+                                              fontFamily: 'Nunito',
+                                              fontSize: _getResponsiveFontSize(context, 18),
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              height: 1.2,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+
+                            SizedBox(height: 20),
+
+                            // Feedback visual de respuestas - MEJORADO
+                            if (showFeedback)
+                              Container(
+                                width: double.infinity,
+                                margin: EdgeInsets.symmetric(horizontal: 8),
+                                padding: EdgeInsets.all(responsivePadding),
+                                decoration: BoxDecoration(
+                                  color: isCorrect
+                                      ? Colors.green.withOpacity(0.15)
+                                      : Colors.red.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(
+                                    color: isCorrect ? Colors.green : Colors.red,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      isCorrect ? Icons.check_circle : Icons.cancel,
+                                      color: isCorrect ? Colors.green : Colors.red,
+                                      size: _getResponsiveFontSize(context, 20),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        isCorrect ? '¡Correcto!' : '¡Incorrecto!',
+                                        style: TextStyle(
+                                          color: isCorrect ? Colors.green : Colors.red,
+                                          fontSize: _getResponsiveFontSize(context, 16),
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Nunito',
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                            SizedBox(height: 30),
+                          ],
                         ),
-                      SizedBox(height: 20),
-                    ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
@@ -337,17 +415,23 @@ class _QuizScreenState extends State<QuizScreen> {
 
   // Confirmación antes de salir
   void _showExitConfirmation() {
+    final responsivePadding = _getResponsivePadding(context);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Color(0xFF2A2A2A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
           title: Text(
             '¿Salir del quiz?',
             style: TextStyle(
               color: Colors.white,
               fontFamily: 'Nunito',
               fontWeight: FontWeight.bold,
+              fontSize: _getResponsiveFontSize(context, 18),
             ),
           ),
           content: Text(
@@ -355,6 +439,7 @@ class _QuizScreenState extends State<QuizScreen> {
             style: TextStyle(
               color: Color(0xFF9E9E9E),
               fontFamily: 'Nunito',
+              fontSize: _getResponsiveFontSize(context, 16),
             ),
           ),
           actions: [
@@ -368,6 +453,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   color: Color(0xFF00BCD4),
                   fontFamily: 'Nunito',
                   fontWeight: FontWeight.w600,
+                  fontSize: _getResponsiveFontSize(context, 16),
                 ),
               ),
             ),
@@ -382,6 +468,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   color: Colors.red,
                   fontFamily: 'Nunito',
                   fontWeight: FontWeight.w600,
+                  fontSize: _getResponsiveFontSize(context, 16),
                 ),
               ),
             ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../viewmodels/quiz_viewmodel.dart';
+import '../viewmodels/profile_viewmodel.dart';
 
-class ResultsScreen extends StatelessWidget {
+class ResultsScreen extends StatefulWidget {
   final int correctAnswers;
   final int totalQuestions;
   final String timeElapsed;
@@ -18,9 +20,97 @@ class ResultsScreen extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<ResultsScreen> createState() => _ResultsScreenState();
+}
+
+class _ResultsScreenState extends State<ResultsScreen> {
+  bool _isSavingScore = false;
+  bool _isNewBest = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _saveScoreIfBest(context);
+    });
+  }
+
+  Future<void> _saveScoreIfBest(BuildContext context) async {
+    setState(() {
+      _isSavingScore = true;
+    });
+
+    try {
+      final profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
+      final isNewBest = await profileViewModel.updateBestScore(widget.correctAnswers, widget.totalQuestions);
+
+      setState(() {
+        _isNewBest = isNewBest;
+      });
+
+      if (isNewBest) {
+        _showNewBestDialog(context);
+      }
+    } catch (e) {
+      print('Error saving score: $e');
+    } finally {
+      setState(() {
+        _isSavingScore = false;
+      });
+    }
+  }
+
+  void _showNewBestDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Color(0xFF2A2A2A),
+          title: Row(
+            children: [
+              Icon(Icons.emoji_events, color: Color(0xFFFFC107), size: 28),
+              SizedBox(width: 8),
+              Text(
+                '¡Nuevo Récord!',
+                style: TextStyle(
+                  color: Color(0xFFFFC107),
+                  fontFamily: 'Nunito',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Has establecido tu mejor puntaje: ${widget.correctAnswers}/${widget.totalQuestions}',
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Nunito',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Genial',
+                style: TextStyle(
+                  color: Color(0xFF00BCD4),
+                  fontFamily: 'Nunito',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final percentage = (correctAnswers / totalQuestions * 100).round();
-    final questionStats = quizViewModel.getQuestionStats();
+    final percentage = (widget.correctAnswers / widget.totalQuestions * 100).round();
+    final questionStats = widget.quizViewModel.getQuestionStats();
     final performance = _getPerformanceLevel(percentage);
 
     return Scaffold(
@@ -30,7 +120,7 @@ class ResultsScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Image.asset(
-              'assets/logo_noesis.png',
+              'assets/logo_noesis_game.png',
               height: 40,
             ),
           ],
@@ -107,7 +197,7 @@ class ResultsScreen extends StatelessWidget {
                                     text: TextSpan(
                                       children: [
                                         TextSpan(
-                                          text: '$correctAnswers',
+                                          text: '${widget.correctAnswers}',
                                           style: TextStyle(
                                             fontFamily: 'Orbitron',
                                             fontSize: 32,
@@ -116,7 +206,7 @@ class ResultsScreen extends StatelessWidget {
                                           ),
                                         ),
                                         TextSpan(
-                                          text: '/$totalQuestions',
+                                          text: '/${widget.totalQuestions}',
                                           style: TextStyle(
                                             fontFamily: 'Orbitron',
                                             fontSize: 20,
@@ -153,7 +243,7 @@ class ResultsScreen extends StatelessWidget {
                                   ),
                                   SizedBox(height: 8),
                                   Text(
-                                    timeElapsed,
+                                    widget.timeElapsed,
                                     style: TextStyle(
                                       fontFamily: 'Orbitron',
                                       fontSize: 32,
@@ -214,6 +304,83 @@ class ResultsScreen extends StatelessWidget {
                     ),
 
                     SizedBox(height: 24),
+
+                    // Score saving status
+                    if (_isSavingScore)
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(16),
+                        margin: EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF2A2A2A),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00BCD4)),
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Text(
+                              'Guardando puntaje...',
+                              style: TextStyle(
+                                color: Color(0xFF9E9E9E),
+                                fontSize: 14,
+                                fontFamily: 'Nunito',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    if (_isNewBest && !_isSavingScore)
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(16),
+                        margin: EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFFFC107).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Color(0xFFFFC107), width: 1),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0xFFFFC107).withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.emoji_events, color: Color(0xFFFFC107), size: 24),
+                            SizedBox(width: 12),
+                            Text(
+                              '¡Nuevo récord personal!',
+                              style: TextStyle(
+                                color: Color(0xFFFFC107),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Nunito',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
 
                     // Análisis por categorías
                     Container(
@@ -320,8 +487,8 @@ class ResultsScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 16),
 
-                          _buildStatRow('Respuestas correctas', '$correctAnswers', Colors.green),
-                          _buildStatRow('Respuestas incorrectas', '${totalQuestions - correctAnswers}', Colors.red),
+                          _buildStatRow('Respuestas correctas', '${widget.correctAnswers}', Colors.green),
+                          _buildStatRow('Respuestas incorrectas', '${widget.totalQuestions - widget.correctAnswers}', Colors.red),
                           _buildStatRow('Precisión', '$percentage%', _getPerformanceColor(percentage)),
                           _buildStatRow('Racha más larga', '${_getLongestStreak()}', Color(0xFF00BCD4)),
                         ],
@@ -340,8 +507,8 @@ class ResultsScreen extends StatelessWidget {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) => AnswersScreen(
-                                  quizViewModel: quizViewModel,
-                                  answerHistory: answerHistory,
+                                  quizViewModel: widget.quizViewModel,
+                                  answerHistory: widget.answerHistory,
                                 ),
                               ),
                             );
@@ -354,48 +521,17 @@ class ResultsScreen extends StatelessWidget {
                           text: 'Nuevo quiz',
                           icon: Icons.refresh,
                           onPressed: () {
-                            quizViewModel.reset();
-                            Navigator.of(context).popUntil((route) => route.isFirst);
+                            widget.quizViewModel.reset();
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              '/menu',
+                              (route) => false, // Esto elimina todas las rutas anteriores
+                            );
                           },
                         ),
                       ],
                     ),
                   ],
                 ),
-              ),
-            ),
-
-            // Bottom navigation
-            Container(
-              height: 60,
-              decoration: BoxDecoration(
-                color: Color(0xFF2A2A2A),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4,
-                    offset: Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    },
-                    icon: Icon(Icons.home, color: Colors.white, size: 28),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.favorite_border, color: Colors.white, size: 28),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.person, color: Colors.white, size: 28),
-                  ),
-                ],
               ),
             ),
           ],
@@ -494,9 +630,9 @@ class ResultsScreen extends StatelessWidget {
 
   String _getTimePerQuestion() {
     // Convertir tiempo elapsed a segundos
-    final parts = timeElapsed.split(':');
+    final parts = widget.timeElapsed.split(':');
     final totalSeconds = int.parse(parts[0]) * 60 + int.parse(parts[1]);
-    final avgSeconds = (totalSeconds / totalQuestions).round();
+    final avgSeconds = (totalSeconds / widget.totalQuestions).round();
     return '${avgSeconds}s por pregunta';
   }
 
@@ -504,7 +640,7 @@ class ResultsScreen extends StatelessWidget {
     int currentStreak = 0;
     int longestStreak = 0;
 
-    for (bool isCorrect in answerHistory) {
+    for (bool isCorrect in widget.answerHistory) {
       if (isCorrect) {
         currentStreak++;
         longestStreak = currentStreak > longestStreak ? currentStreak : longestStreak;
@@ -546,7 +682,7 @@ class AnswersScreen extends StatelessWidget {
               ),
             ),
             Image.asset(
-              'assets/logo_noesis.png',
+              'assets/logo_noesis_game.png',
               height: 40,
             ),
           ],
@@ -714,40 +850,6 @@ class AnswersScreen extends StatelessWidget {
                     ),
                   );
                 },
-              ),
-            ),
-
-            // Bottom navigation
-            Container(
-              height: 60,
-              decoration: BoxDecoration(
-                color: Color(0xFF2A2A2A),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4,
-                    offset: Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    },
-                    icon: Icon(Icons.home, color: Colors.white, size: 28),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.favorite_border, color: Colors.white, size: 28),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.person, color: Colors.white, size: 28),
-                  ),
-                ],
               ),
             ),
           ],

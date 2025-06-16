@@ -7,8 +7,10 @@ class SignupViewModel with ChangeNotifier {
   String email = '';
   String password = '';
 
+  // Getter para el estado de carga
   bool get isLoading => _isLoading;
 
+  // Registrar un nuevo usuario usando la API
   Future<Map<String, dynamic>> registrarUsuario() async {
     _isLoading = true;
     notifyListeners();

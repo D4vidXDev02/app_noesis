@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/lesson.dart';
 
 class FavoritesService {
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'https://noesisbackend-services.onrender.com';
 
   // Obtener favoritos del usuario
   static Future<List<Lesson>> getFavorites(String userEmail) async {
@@ -34,7 +34,6 @@ class FavoritesService {
         Uri.parse('$baseUrl/usuarios/$userEmail/favoritos'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'email': userEmail,
           'clase_id': lesson.id,
           'nombre_clase': lesson.name,
           'imagen_path': lesson.imagePath,
@@ -52,12 +51,8 @@ class FavoritesService {
   static Future<bool> removeFromFavorites(String userEmail, String lessonId) async {
     try {
       final response = await http.delete(
-        Uri.parse('$baseUrl/usuarios/$userEmail/favoritos'),
+        Uri.parse('$baseUrl/usuarios/$userEmail/favoritos/$lessonId'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'email': userEmail,
-          'clase_id': lessonId,
-        }),
       );
 
       return response.statusCode == 200;

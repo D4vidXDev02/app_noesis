@@ -128,7 +128,7 @@ class _FuturePerfectScreenState extends State<FuturePerfectScreen> {
           children: [
             Center(
               child: Image.asset(
-                '../assets/future_perfect_pizarra.png',
+                'assets/future_perfect_pizarra.png',
                 width: 300,
               ),
             ),
@@ -158,7 +158,7 @@ class _FuturePerfectScreenState extends State<FuturePerfectScreen> {
               ),
               child: Center(
                 child: Image.asset(
-                  '../assets/future_perfect_tabla.png',
+                  'assets/future_perfect_tabla.png',
                   width: 300,
                 ),
               ),

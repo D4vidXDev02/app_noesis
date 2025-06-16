@@ -10,69 +10,69 @@ class QuizViewModel {
     // Verb To Be (10 preguntas)
     QuizQuestion(
       question: "He ___ a doctor.",
-      options: ["are", "is", "am", "be"],
+      options: ["is", "are", "am", "be"],
       correctAnswer: "is",
     ),
     QuizQuestion(
       question: "They ___ my friends.",
-      options: ["is", "are", "am", "be"],
-      correctAnswer: "are",
-    ),
-    QuizQuestion(
-      question: "My parents ___ always supportive of my decisions.",
       options: ["is", "am", "are", "be"],
       correctAnswer: "are",
     ),
     QuizQuestion(
+      question: "My parents ___ always supportive of my decisions.",
+      options: ["are", "is", "am", "be"],
+      correctAnswer: "are",
+    ),
+    QuizQuestion(
       question: "The documents ___ supposed to be on the manager's desk this morning.",
-      options: ["are", "is", "was", "be"],
+      options: ["is", "was", "be", "are"],
       correctAnswer: "are",
     ),
     QuizQuestion(
       question: "I ___ not ready for the exam yet.",
-      options: ["is", "are", "am", "be"],
+      options: ["is", "are", "be", "am"],
       correctAnswer: "am",
     ),
     QuizQuestion(
       question: "The book ___ on the table.",
-      options: ["are", "is", "am", "were"],
+      options: ["are", "is", "were", "am"],
       correctAnswer: "is",
     ),
     QuizQuestion(
       question: "We ___ students at the university.",
-      options: ["is", "am", "are", "was"],
+      options: ["are", "is", "am", "was"],
       correctAnswer: "are",
     ),
     QuizQuestion(
       question: "She ___ very talented in music.",
-      options: ["are", "am", "is", "were"],
+      options: ["are", "am", "were", "is"],
       correctAnswer: "is",
     ),
     QuizQuestion(
       question: "You ___ welcome to join us anytime.",
-      options: ["is", "am", "are", "was"],
+      options: ["are", "is", "am", "was"],
       correctAnswer: "are",
     ),
     QuizQuestion(
       question: "It ___ a beautiful day today.",
-      options: ["are", "am", "is", "were"],
+      options: ["am", "are", "were", "is"],
       correctAnswer: "is",
     ),
 
     // Present Simple (10 preguntas)
     QuizQuestion(
       question: "She ___ every morning at 6 AM.",
-      options: ["wake", "waking", "woke", "wakes"],
+      options: ["wake", "wakes", "waking", "woke"],
       correctAnswer: "wakes",
     ),
     QuizQuestion(
       question: "We ___ to the same school.",
-      options: ["goes", "go", "going", "gone"],
+      options: ["go", "goes", "going", "gone"],
       correctAnswer: "go",
     ),
     QuizQuestion(
       question: "He usually ___ his homework before dinner.",
-      options: ["do", "did", "does", "doing"],
+      options: ["do", "did", "doing", "does"],
       correctAnswer: "does",
     ),
     QuizQuestion(
@@ -82,17 +82,17 @@ class QuizViewModel {
     ),
     QuizQuestion(
       question: "My sister ___ English and French fluently.",
-      options: ["speak", "speaks", "speaking", "spoke"],
+      options: ["speak", "speaking", "spoke", "speaks"],
       correctAnswer: "speaks",
     ),
     QuizQuestion(
       question: "They ___ coffee every morning.",
-      options: ["drinks", "drink", "drinking", "drank"],
+      options: ["drink", "drinks", "drinking", "drank"],
       correctAnswer: "drink",
     ),
     QuizQuestion(
       question: "The sun ___ in the east.",
-      options: ["rise", "rises", "rising", "rose"],
+      options: ["rise", "rising", "rises", "rose"],
       correctAnswer: "rises",
     ),
     QuizQuestion(
@@ -102,64 +102,64 @@ class QuizViewModel {
     ),
     QuizQuestion(
       question: "She ___ to work by bus.",
-      options: ["travel", "travels", "traveling", "traveled"],
+      options: ["travel", "traveling", "traveled", "travels"],
       correctAnswer: "travels",
     ),
     QuizQuestion(
       question: "We ___ our grandparents every weekend.",
-      options: ["visit", "visits", "visiting", "visited"],
+      options: ["visits", "visiting", "visited", "visit"],
       correctAnswer: "visit",
     ),
 
     // Future Perfect (10 preguntas)
     QuizQuestion(
       question: "By 8 PM, I ___ my homework.",
-      options: ["will finished", "will be finished", "will finish", "will have finished"],
+      options: ["will have finished", "will finished", "will be finished", "will finish"],
       correctAnswer: "will have finished",
     ),
     QuizQuestion(
       question: "She ___ dinner before we arrive.",
-      options: ["will have cooked", "has cooked", "will cook", "cooks"],
+      options: ["has cooked", "will have cooked", "will cook", "cooks"],
       correctAnswer: "will have cooked",
     ),
     QuizQuestion(
       question: "By next semester, they ___ all the required courses.",
-      options: ["will have completed", "complete", "will complete", "completed"],
+      options: ["complete", "will complete", "will have completed", "completed"],
       correctAnswer: "will have completed",
     ),
     QuizQuestion(
       question: "By 2030, scientists ___ a cure for many rare diseases.",
-      options: ["have found", "found", "will have found", "find"],
+      options: ["will have found", "have found", "found", "find"],
       correctAnswer: "will have found",
     ),
     QuizQuestion(
       question: "By the time you get home, I ___ the report.",
-      options: ["will finish", "will have finished", "finish", "finished"],
+      options: ["will finish", "finish", "finished", "will have finished"],
       correctAnswer: "will have finished",
     ),
     QuizQuestion(
       question: "They ___ the project by next Friday.",
-      options: ["will complete", "will have completed", "complete", "completed"],
+      options: ["will complete", "complete", "will have completed", "completed"],
       correctAnswer: "will have completed",
     ),
     QuizQuestion(
       question: "By noon, she ___ for three hours.",
-      options: ["will study", "will have studied", "studies", "studied"],
+      options: ["will study", "studies", "will have studied", "studied"],
       correctAnswer: "will have studied",
     ),
     QuizQuestion(
       question: "We ___ all the books by the end of the month.",
-      options: ["will read", "will have read", "read", "reads"],
+      options: ["will have read", "will read", "read", "reads"],
       correctAnswer: "will have read",
     ),
     QuizQuestion(
       question: "By tomorrow, he ___ the entire presentation.",
-      options: ["will prepare", "will have prepared", "prepares", "prepared"],
+      options: ["will prepare", "prepares", "prepared", "will have prepared"],
       correctAnswer: "will have prepared",
     ),
     QuizQuestion(
       question: "The team ___ the championship by next year.",
-      options: ["will win", "will have won", "wins", "won"],
+      options: ["will win", "wins", "will have won", "won"],
       correctAnswer: "will have won",
     ),
 
@@ -171,7 +171,7 @@ class QuizViewModel {
     ),
     QuizQuestion(
       question: "He ___ play the piano.",
-      options: ["will", "can", "is", "does"],
+      options: ["will", "is", "can", "does"],
       correctAnswer: "can",
     ),
     QuizQuestion(
@@ -181,17 +181,17 @@ class QuizViewModel {
     ),
     QuizQuestion(
       question: "Although he's young, he ___ analyze complex systems with ease.",
-      options: ["can", "may", "is", "will"],
+      options: ["may", "can", "is", "will"],
       correctAnswer: "can",
     ),
     QuizQuestion(
       question: "We ___ help you with your project.",
-      options: ["will", "are", "can", "do"],
+      options: ["will", "are", "do", "can"],
       correctAnswer: "can",
     ),
     QuizQuestion(
       question: "They ___ swim very well.",
-      options: ["are", "do", "will", "can"],
+      options: ["can", "are", "do", "will"],
       correctAnswer: "can",
     ),
     QuizQuestion(
@@ -201,17 +201,17 @@ class QuizViewModel {
     ),
     QuizQuestion(
       question: "My brother ___ cook delicious meals.",
-      options: ["is", "does", "can", "will"],
+      options: ["is", "does", "will", "can"],
       correctAnswer: "can",
     ),
     QuizQuestion(
       question: "She ___ solve difficult math problems quickly.",
-      options: ["will", "is", "can", "does"],
+      options: ["will", "can", "is", "does"],
       correctAnswer: "can",
     ),
     QuizQuestion(
       question: "We ___ meet tomorrow if you're available.",
-      options: ["are", "do", "can", "will"],
+      options: ["are", "do", "will", "can"],
       correctAnswer: "can",
     ),
   ];

@@ -11,12 +11,15 @@ class LoginViewModel with ChangeNotifier {
   String email = '';
   String password = '';
 
+  // Getter para el estado de carga
   bool get isLoading => _isLoading;
 
+  // Metodo para obtener la lista de usuarios desde la API
   Future<void> fetchUsuarios() async {
     _usuarios = await _apiService.fetchUsuarios();
   }
 
+  // Metodo para validar las credenciales de inicio de sesión
   Future<bool> validateLogin() async {
     _isLoading = true;
     notifyListeners();

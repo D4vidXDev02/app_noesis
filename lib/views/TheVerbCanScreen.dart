@@ -128,7 +128,7 @@ class _TheVerbCanScreenState extends State<TheVerbCanScreen> {
           children: [
             Center(
               child: Image.asset(
-                '../assets/the_verb_can_pizarra.png',
+                'assets/the_verb_can_pizarra.png',
                 width: 300,
               ),
             ),
@@ -158,7 +158,7 @@ class _TheVerbCanScreenState extends State<TheVerbCanScreen> {
               ),
               child: Center(
                 child: Image.asset(
-                  '../assets/the_verb_can_tabla.png',
+                  'assets/the_verb_can_tabla.png',
                   width: 300,
                 ),
               ),
