@@ -234,7 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         // Navegar al login y limpiar el stack
         Navigator.of(context).pushNamedAndRemoveUntil(
-          '/login', // Asume que tienes esta ruta definida
+          '/login',
               (route) => false,
         );
 
@@ -289,7 +289,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        foregroundColor: Color(0xFFC96B0D), // Para que el ícono de back sea naranja
+        foregroundColor: Color(0xFFC96B0D),
         backgroundColor: Colors.white,
         elevation: 0,
         title: Row(
