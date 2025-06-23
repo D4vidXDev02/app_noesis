@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../models/lesson.dart';
 import '../services/favorites_service.dart';
@@ -9,6 +8,7 @@ import 'PresentSimpleScreen.dart';
 import 'TheVerbCanScreen.dart';
 import 'ProfileScreen.dart';
 import 'MenuScreen.dart';
+import 'SettingsScreen.dart';
 
 class FavoritesScreen extends StatefulWidget {
   @override
@@ -210,6 +210,17 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ProfileScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Ajustes'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsScreen()),
                 );
               },
             ),

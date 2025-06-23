@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:noesis/views/FavoritesScreen.dart';
+import '../services/favorites_service.dart';
+import '../services/user_session_service.dart';
+import '../services/visits_service.dart';
+import '../models/lesson.dart';
 import 'VerboToBeScreen.dart';
 import 'FuturePerfectScreen.dart';
 import 'PresentSimpleScreen.dart';
 import 'TheVerbCanScreen.dart';
 import 'QuizScreen.dart';
 import 'ProfileScreen.dart';
-import '../services/favorites_service.dart';
-import '../services/user_session_service.dart';
-import '../models/lesson.dart';
-import '../services/visits_service.dart';
+import 'SettingsScreen.dart';
+
+
 
 class MenuScreen extends StatefulWidget {
   @override
@@ -325,6 +328,17 @@ class _MenuScreenState extends State<MenuScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ProfileScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Ajustes'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsScreen()),
                 );
               },
             ),

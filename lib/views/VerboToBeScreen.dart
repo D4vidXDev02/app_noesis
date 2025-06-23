@@ -58,7 +58,11 @@ class _VerboToBeScreenState extends State<VerboToBeScreen> {
     super.dispose();
   }
 
-  Widget _buildAudioExample(String englishText, String spanishText, String audioFile) {
+  Widget _buildAudioExample(
+      String englishText,
+      String spanishText,
+      String audioFile,
+      ) {
     bool isThisPlaying = isPlaying && currentlyPlaying == audioFile;
 
     return Container(
@@ -72,17 +76,11 @@ class _VerboToBeScreenState extends State<VerboToBeScreen> {
               children: [
                 Text(
                   englishText,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   spanishText,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                 ),
               ],
             ),
@@ -110,12 +108,7 @@ class _VerboToBeScreenState extends State<VerboToBeScreen> {
         backgroundColor: Colors.white,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Image.asset(
-              'assets/logo_noesis.png',
-              height: 40,
-            ),
-          ],
+          children: [Image.asset('assets/logo_noesis.png', height: 40)],
         ),
         iconTheme: IconThemeData(color: Colors.black),
         elevation: 0,
@@ -127,17 +120,12 @@ class _VerboToBeScreenState extends State<VerboToBeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Image.asset(
-                'assets/verbo_to_be_pizarra.png',
-                width: 300,
-              ),
+              child: Image.asset('assets/verbo_to_be_pizarra.png', width: 300),
             ),
             SizedBox(height: 16),
             Container(
               padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-              ),
+              decoration: BoxDecoration(color: Colors.white),
               child: Text(
                 'El verbo "to be" en inglés es fundamental, ya que puede traducirse como \'ser\' o \'estar\'. Se utiliza para describir estados, cualidades, características o ubicaciones de personas, animales o cosas. Por ejemplo, "Ella es ingeniera" se traduce como "She is an engineer", y "Estamos cansados" se traduce como "We are tired".',
                 style: TextStyle(
@@ -157,10 +145,7 @@ class _VerboToBeScreenState extends State<VerboToBeScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
-                child: Image.asset(
-                  'assets/verbo_to_be_tabla.png',
-                  width: 300,
-                ),
+                child: Image.asset('assets/verbo_to_be_tabla.png', width: 300),
               ),
             ),
             SizedBox(height: 20),

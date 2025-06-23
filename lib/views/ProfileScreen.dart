@@ -3,6 +3,8 @@ import 'package:noesis/views/FavoritesScreen.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/profile_viewmodel.dart';
 import 'MenuScreen.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'SettingsScreen.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -21,6 +23,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Cargar datos del perfil al inicializar la pantalla
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _profileViewModel.loadProfileData();
+
+      if (_profileViewModel.isLoggedIn) {
+        _profileViewModel.refreshMLPrediction();
+        _profileViewModel.loadUserRecommendations();
+        _profileViewModel.loadCompleteMLAnalysis();
+      }
     });
   }
 
@@ -131,6 +139,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onTap: () {
                       Navigator.pop(context);
                       // Ya estamos en ProfileScreen, no necesitamos navegar
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.settings),
+                    title: Text('Ajustes'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SettingsScreen()),
+                      );
                     },
                   ),
                   Divider(),
@@ -334,19 +353,181 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             SizedBox(height: 8),
                             // Badge del nivel
+                            // Container(
+                            //   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            //   decoration: BoxDecoration(
+                            //     color: _getLevelColor(viewModel.nivel),
+                            //     borderRadius: BorderRadius.circular(16),
+                            //   ),
+                            //   child: Text(
+                            //     viewModel.nivel,
+                            //     style: TextStyle(
+                            //       fontFamily: 'Nunito',
+                            //       fontSize: 14,
+                            //       fontWeight: FontWeight.bold,
+                            //       color: Colors.white,
+                            //     ),
+                            //   ),
+                            // ),
+                            // Container(
+                            //   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            //   decoration: BoxDecoration(
+                            //     color: _getLevelColor(viewModel.nivel),
+                            //     borderRadius: BorderRadius.circular(16),
+                            //   ),
+                            //   child: Row(
+                            //     mainAxisSize: MainAxisSize.min,
+                            //     children: [
+                            //       Icon(
+                            //         Icons.psychology, // Icono de IA/ML
+                            //         color: Colors.white,
+                            //         size: 14,
+                            //       ),
+                            //       SizedBox(width: 4),
+                            //       Text(
+                            //         '${viewModel.nivel} (ML)',
+                            //         style: TextStyle(
+                            //           fontFamily: 'Nunito',
+                            //           fontSize: 14,
+                            //           fontWeight: FontWeight.bold,
+                            //           color: Colors.white,
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                               decoration: BoxDecoration(
                                 color: _getLevelColor(viewModel.nivel),
                                 borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _getLevelColor(viewModel.nivel).withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              child: Text(
-                                viewModel.nivel,
-                                style: TextStyle(
-                                  fontFamily: 'Nunito',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.psychology, // Icono de IA/ML
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    '${viewModel.nivel}',
+                                    style: TextStyle(
+                                      fontFamily: 'Nunito',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  if (viewModel.mlPredictionData?['es_prediccion_mejor'] == true) ...[
+                                    SizedBox(width: 4),
+                                    Icon(
+                                      Icons.trending_up,
+                                      color: Colors.white,
+                                      size: 12,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+
+// FRAGMENTO 4: Agregar este widget después del badge de nivel (nuevo componente)
+// Mostrar recomendación ML si está disponible
+                            if (viewModel.mlRecommendation != null) ...[
+                              SizedBox(height: 12),
+                              Container(
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.blue.shade200),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.lightbulb_outline,
+                                      color: Colors.blue.shade600,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        viewModel.mlRecommendation!,
+                                        style: TextStyle(
+                                          fontFamily: 'Nunito',
+                                          fontSize: 13,
+                                          color: Colors.blue.shade800,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+
+// FRAGMENTO 5: Agregar botón de actualización ML (después de las estadísticas)
+// Botón para refrescar análisis ML
+                            SizedBox(height: 16),
+                            GestureDetector(
+                              onTap: viewModel.isLoadingPrediction ? null : () async {
+                                await viewModel.refreshMLPrediction();
+                                await viewModel.loadUserRecommendations();
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.purple.shade400, Colors.purple.shade600],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(25),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.purple.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (viewModel.isLoadingPrediction)
+                                      SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    else
+                                      Icon(
+                                        Icons.refresh,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      viewModel.isLoadingPrediction ? 'Analizando...' : 'Análisis ML',
+                                      style: TextStyle(
+                                        fontFamily: 'Nunito',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -459,6 +640,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                   SizedBox(height: 40),
+
+                  // GRÁFICO DE PROBABILIDADES ML
+                  _buildProbabilityChart(viewModel),
+
+                  //TARJETA DE COMPARACIÓN ML
+                  _buildMLDataCard(viewModel),
 
                   // Sección clase más recurrida
                   Text(
@@ -648,6 +835,532 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
         },
       ),
+    );
+  }
+
+
+  // WIDGET DEL GRÁFICO DE PROBABILIDADES RESPONSIVO
+  Widget _buildProbabilityChart(ProfileViewModel viewModel) {
+    if (viewModel.mlPredictionData == null) {
+      return SizedBox.shrink();
+    }
+
+    final data = viewModel.mlPredictionData!;
+    final probabilidades = data['probabilidades'] as Map<String, dynamic>? ?? {};
+
+    // Convertir probabilidades a lista ordenada
+    final probList = probabilidades.entries.map((entry) {
+      return MapEntry(entry.key, (entry.value as num).toDouble() * 100);
+    }).toList();
+
+    // Ordenar por probabilidad descendente
+    probList.sort((a, b) => b.value.compareTo(a.value));
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Responsive height basado en el ancho de pantalla
+        double chartHeight = constraints.maxWidth < 400 ? 280 : 320;
+        double titleFontSize = constraints.maxWidth < 400 ? 16 : 18;
+        double labelFontSize = constraints.maxWidth < 400 ? 10 : 12;
+
+        return Container(
+          width: double.infinity, // Ocupa todo el ancho disponible
+          height: chartHeight,
+          padding: EdgeInsets.all(constraints.maxWidth < 400 ? 16 : 20),
+          margin: EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.purple.shade50, Colors.indigo.shade50],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.purple.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.purple.withOpacity(0.1),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header responsivo
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.shade600,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.bar_chart, color: Colors.white, size: 20),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Probabilidades por Nivel',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple.shade800,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+
+              // Gráfico con restricciones responsivas
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      maxY: 100,
+                      barTouchData: BarTouchData(
+                        touchTooltipData: BarTouchTooltipData(
+                          getTooltipColor: (touchedSpot) => Colors.purple.shade600,
+                          getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                            return BarTooltipItem(
+                              '${probList[group.x.toInt()].key}\n${rod.toY.toStringAsFixed(1)}%',
+                              TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: labelFontSize,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      titlesData: FlTitlesData(
+                        show: true,
+                        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: constraints.maxWidth < 400 ? 35 : 40,
+                            getTitlesWidget: (double value, TitleMeta meta) {
+                              if (value.toInt() < probList.length) {
+                                String label = probList[value.toInt()].key;
+                                // Truncar texto en pantallas pequeñas
+                                if (constraints.maxWidth < 400 && label.length > 8) {
+                                  label = label.substring(0, 7) + '...';
+                                }
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Text(
+                                    label,
+                                    style: TextStyle(
+                                      fontFamily: 'Nunito',
+                                      fontSize: labelFontSize,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.purple.shade700,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                );
+                              }
+                              return Text('');
+                            },
+                          ),
+                        ),
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: constraints.maxWidth < 400 ? 35 : 40,
+                            getTitlesWidget: (double value, TitleMeta meta) {
+                              return Text(
+                                '${value.toInt()}%',
+                                style: TextStyle(
+                                  fontSize: labelFontSize - 1,
+                                  color: Colors.grey.shade600,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      borderData: FlBorderData(show: false),
+                      barGroups: probList.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final prob = entry.value;
+
+                        Color barColor;
+                        if (prob.key == data['nivel_predicho']) {
+                          barColor = Colors.purple.shade600;
+                        } else {
+                          barColor = Colors.purple.shade300;
+                        }
+
+                        // Ancho de barra responsivo
+                        double barWidth = constraints.maxWidth < 400 ? 16 : 20;
+
+                        return BarChartGroupData(
+                          x: index,
+                          barRods: [
+                            BarChartRodData(
+                              toY: prob.value,
+                              color: barColor,
+                              width: barWidth,
+                              borderRadius: BorderRadius.circular(4),
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  barColor,
+                                  barColor.withOpacity(0.7),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                      gridData: FlGridData(
+                        show: true,
+                        drawVerticalLine: false,
+                        horizontalInterval: 20,
+                        getDrawingHorizontalLine: (value) {
+                          return FlLine(
+                            color: Colors.purple.shade200.withOpacity(0.5),
+                            strokeWidth: 1,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 12),
+
+              // Leyenda responsiva
+              Wrap(
+                alignment: WrapAlignment.center,
+                runSpacing: 8,
+                spacing: 16,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Colors.purple.shade600,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        'Predicción ML',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: labelFontSize,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.purple.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Colors.purple.shade300,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        'Otros niveles',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: labelFontSize,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.purple.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+// WIDGET DE LA TABLA DE COMPARACIÓN RESPONSIVO
+  Widget _buildMLDataCard(ProfileViewModel viewModel) {
+    if (viewModel.mlPredictionData == null) {
+      return SizedBox.shrink();
+    }
+
+    final data = viewModel.mlPredictionData!;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double titleFontSize = constraints.maxWidth < 400 ? 16 : 18;
+        double tableFontSize = constraints.maxWidth < 400 ? 12 : 14;
+        double cellFontSize = constraints.maxWidth < 400 ? 11 : 13;
+        double padding = constraints.maxWidth < 400 ? 16 : 20;
+
+        return Container(
+          width: double.infinity,
+          margin: EdgeInsets.symmetric(vertical: 16),
+          padding: EdgeInsets.all(padding),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.indigo.shade50, Colors.blue.shade50],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.blue.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.withOpacity(0.1),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header responsivo
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade600,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.analytics, color: Colors.white, size: 20),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Análisis ML vs Datos Guardados',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade800,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+
+              // Tabla responsiva con SingleChildScrollView horizontal para pantallas muy pequeñas
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.shade200.withOpacity(0.5)),
+                ),
+                child: constraints.maxWidth < 350
+                    ? SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: _buildComparisonTable(viewModel, data, tableFontSize, cellFontSize, false),
+                )
+                    : _buildComparisonTable(viewModel, data, tableFontSize, cellFontSize, true),
+              ),
+
+              SizedBox(height: 16),
+
+              // Indicador de mejora responsivo
+              if (data['es_prediccion_mejor'] == true)
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green.shade300),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.trending_up, color: Colors.green.shade700, size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '¡El análisis ML sugiere que podrías estar en un nivel superior!',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: cellFontSize + 1,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green.shade800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+// TABLA DE COMPARACIÓN RESPONSIVA
+  Widget _buildComparisonTable(ProfileViewModel viewModel, Map<String, dynamic> data,
+      double headerFontSize, double cellFontSize, bool isFlexible) {
+
+    Widget buildRow(String metric, String saved, String predicted, Color backgroundColor, {bool isLast = false, bool isHeader = false}) {
+      return Container(
+        padding: EdgeInsets.symmetric(vertical: isHeader ? 16 : 14, horizontal: 8),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: isLast ? BorderRadius.only(
+            bottomLeft: Radius.circular(12),
+            bottomRight: Radius.circular(12),
+          ) : isHeader ? BorderRadius.only(
+            topLeft: Radius.circular(12),
+            topRight: Radius.circular(12),
+          ) : null,
+        ),
+        child: Row(
+          mainAxisSize: isFlexible ? MainAxisSize.max : MainAxisSize.min,
+          children: [
+            Container(
+              width: isFlexible ? null : 100,
+              child: isFlexible
+                  ? Expanded(
+                flex: 2,
+                child: Text(
+                  metric,
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: isHeader ? headerFontSize : cellFontSize,
+                    fontWeight: isHeader ? FontWeight.bold : FontWeight.w600,
+                    color: isHeader ? Colors.blue.shade800 : Colors.grey.shade700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              )
+                  : Text(
+                metric,
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: isHeader ? headerFontSize : cellFontSize,
+                  fontWeight: isHeader ? FontWeight.bold : FontWeight.w600,
+                  color: isHeader ? Colors.blue.shade800 : Colors.grey.shade700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Container(
+              width: isFlexible ? null : 100,
+              child: isFlexible
+                  ? Expanded(
+                flex: 2,
+                child: Text(
+                  saved,
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: isHeader ? headerFontSize : cellFontSize,
+                    fontWeight: isHeader ? FontWeight.bold : FontWeight.w500,
+                    color: isHeader ? Colors.blue.shade800 : Colors.grey.shade700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              )
+                  : Text(
+                saved,
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: isHeader ? headerFontSize : cellFontSize,
+                  fontWeight: isHeader ? FontWeight.bold : FontWeight.w500,
+                  color: isHeader ? Colors.blue.shade800 : Colors.grey.shade700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Container(
+              width: isFlexible ? null : 100,
+              child: isFlexible
+                  ? Expanded(
+                flex: 2,
+                child: Text(
+                  predicted,
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: isHeader ? headerFontSize : cellFontSize,
+                    fontWeight: FontWeight.w600,
+                    color: isHeader ? Colors.blue.shade800 : Colors.purple.shade700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              )
+                  : Text(
+                predicted,
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: isHeader ? headerFontSize : cellFontSize,
+                  fontWeight: FontWeight.w600,
+                  color: isHeader ? Colors.blue.shade800 : Colors.purple.shade700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        // Header
+        buildRow('Métrica', 'Guardado', 'ML Predicho', Colors.blue.shade100, isHeader: true),
+
+        // Filas de datos
+        buildRow(
+          'Puntaje',
+          '${viewModel.puntajeObtenido}/${viewModel.puntajeTotal}',
+          '${data['puntaje_obtenido']}/${data['puntaje_total']}',
+          Colors.grey.shade50,
+        ),
+        buildRow(
+          'Porcentaje',
+          '${((viewModel.puntajeObtenido / viewModel.puntajeTotal) * 100).round()}%',
+          '${data['porcentaje']?.toStringAsFixed(1)}%',
+          Colors.white,
+        ),
+        buildRow(
+          'Nivel',
+          viewModel.nivel,
+          data['nivel_predicho'],
+          Colors.grey.shade50,
+        ),
+        buildRow(
+          'Confianza ML',
+          '',
+          '${((data['confianza'] ?? 0) * 100).toStringAsFixed(1)}%',
+          Colors.white,
+          isLast: true,
+        ),
+      ],
     );
   }
 

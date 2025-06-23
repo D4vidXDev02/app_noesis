@@ -524,7 +524,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                             widget.quizViewModel.reset();
                             Navigator.of(context).pushNamedAndRemoveUntil(
                               '/menu',
-                              (route) => false, // Esto elimina todas las rutas anteriores
+                                  (route) => false, // Esto elimina todas las rutas anteriores
                             );
                           },
                         ),
