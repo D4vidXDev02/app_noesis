@@ -199,8 +199,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         // Avatar del usuario
                         Container(
-                          width: 80,
-                          height: 80,
+                          width: 100,
+                          height: 100,
                           decoration: BoxDecoration(
                             color: Color(0xFFFFF3E0),
                             shape: BoxShape.circle,

@@ -7,7 +7,7 @@ class ProfileViewModel with ChangeNotifier {
   final UserSessionService _sessionService = UserSessionService();
 
   // Datos del perfil (estos vendrán eventualmente de la API)
-  String _nivel = "Intermedio";
+  String _nivel = "";
   int _puntajeObtenido = 0;
   int _puntajeTotal = 20;
   String _claseMasRecurrida = "Ninguna clase visitada aún";
@@ -97,6 +97,50 @@ class ProfileViewModel with ChangeNotifier {
     }
   }
 
+  // Future<bool> updateBestScore(int correctAnswers, int totalQuestions) async {
+  //   if (!isLoggedIn || userEmail == null) return false;
+  //
+  //   try {
+  //     // Calcular nivel básico como fallback
+  //     final percentage = (correctAnswers / totalQuestions * 100).round();
+  //     String fallbackLevel = _calculateLevel(percentage);
+  //
+  //     // Actualizar puntaje - el backend ya incluye ML automáticamente
+  //     final response = await ApiService.updateBestScore(
+  //         userEmail!,
+  //         correctAnswers,
+  //         totalQuestions,
+  //         fallbackLevel
+  //     );
+  //
+  //     if (response['success']) {
+  //       final isNewBest = response['data']?['is_new_best'] ?? false;
+  //       final mlEnhanced = response['data']?['ml_enhanced'] ?? false;
+  //
+  //       if (isNewBest || response['data']?['is_new_best'] == null) {
+  //         _puntajeObtenido = correctAnswers;
+  //         _puntajeTotal = totalQuestions;
+  //         _nivel = response['data']?['nivel'] ?? fallbackLevel;
+  //
+  //         // Refrescar predicción ML después de actualizar
+  //         await refreshMLPrediction();
+  //
+  //         notifyListeners();
+  //
+  //         if (mlEnhanced) {
+  //           print('Nivel mejorado por ML: ${_nivel}');
+  //         }
+  //
+  //         return true;
+  //       }
+  //     }
+  //   } catch (e) {
+  //     print('Error updating best score: $e');
+  //   }
+  //
+  //   return false;
+  // }
+
   Future<bool> updateBestScore(int correctAnswers, int totalQuestions) async {
     if (!isLoggedIn || userEmail == null) return false;
 
@@ -104,6 +148,13 @@ class ProfileViewModel with ChangeNotifier {
       // Calcular nivel básico como fallback
       final percentage = (correctAnswers / totalQuestions * 100).round();
       String fallbackLevel = _calculateLevel(percentage);
+
+      // ✅ DEBUG: Mostrar estado actual antes de actualizar
+      print('=== ANTES DE ACTUALIZAR ===');
+      print('Puntaje actual guardado: $_puntajeObtenido/$_puntajeTotal');
+      print('Nuevo puntaje: $correctAnswers/$totalQuestions');
+      print('Porcentaje actual: ${(_puntajeObtenido / _puntajeTotal * 100).round()}%');
+      print('Porcentaje nuevo: $percentage%');
 
       // Actualizar puntaje - el backend ya incluye ML automáticamente
       final response = await ApiService.updateBestScore(
@@ -113,11 +164,21 @@ class ProfileViewModel with ChangeNotifier {
           fallbackLevel
       );
 
+      print('=== RESPUESTA DEL BACKEND ===');
+      print('Response completa: $response');
+
       if (response['success']) {
-        final isNewBest = response['data']?['is_new_best'] ?? false;
+        // ✅ CORRECCIÓN: Solo considerar como nuevo récord si está explícitamente marcado como tal
+        final isNewBest = response['data']?['is_new_best'] == true;
         final mlEnhanced = response['data']?['ml_enhanced'] ?? false;
 
-        if (isNewBest || response['data']?['is_new_best'] == null) {
+        print('=== ANÁLISIS DE RESPUESTA ===');
+        print('is_new_best del backend: ${response['data']?['is_new_best']}');
+        print('is_new_best procesado: $isNewBest');
+        print('ml_enhanced: $mlEnhanced');
+
+        // ✅ CORRECCIÓN: Solo actualizar datos locales si realmente es un nuevo récord
+        if (isNewBest) {
           _puntajeObtenido = correctAnswers;
           _puntajeTotal = totalQuestions;
           _nivel = response['data']?['nivel'] ?? fallbackLevel;
@@ -131,11 +192,17 @@ class ProfileViewModel with ChangeNotifier {
             print('Nivel mejorado por ML: ${_nivel}');
           }
 
-          return true;
+          print('✅ ¡Nuevo récord establecido: $correctAnswers/$totalQuestions!');
+          return true; // ✅ Solo retorna true para récords reales
+        } else {
+          print('❌ Puntaje no supera el récord actual: $correctAnswers/$totalQuestions');
+          return false; // ✅ Retorna false cuando no es récord
         }
+      } else {
+        print('❌ Error en respuesta del backend: ${response['message']}');
       }
     } catch (e) {
-      print('Error updating best score: $e');
+      print('❌ Error updating best score: $e');
     }
 
     return false;

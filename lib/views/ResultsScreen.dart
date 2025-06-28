@@ -35,6 +35,31 @@ class _ResultsScreenState extends State<ResultsScreen> {
     });
   }
 
+  // Future<void> _saveScoreIfBest(BuildContext context) async {
+  //   setState(() {
+  //     _isSavingScore = true;
+  //   });
+  //
+  //   try {
+  //     final profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
+  //     final isNewBest = await profileViewModel.updateBestScore(widget.correctAnswers, widget.totalQuestions);
+  //
+  //     setState(() {
+  //       _isNewBest = isNewBest;
+  //     });
+  //
+  //     if (isNewBest) {
+  //       _showNewBestDialog(context);
+  //     }
+  //   } catch (e) {
+  //     print('Error saving score: $e');
+  //   } finally {
+  //     setState(() {
+  //       _isSavingScore = false;
+  //     });
+  //   }
+  // }
+
   Future<void> _saveScoreIfBest(BuildContext context) async {
     setState(() {
       _isSavingScore = true;
@@ -42,14 +67,48 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
     try {
       final profileViewModel = Provider.of<ProfileViewModel>(context, listen: false);
+
+      // ✅ VERIFICACIÓN ADICIONAL: Obtener el puntaje actual antes de actualizar
+      final currentBestScore = profileViewModel.puntajeObtenido;
+      final currentTotalQuestions = profileViewModel.puntajeTotal;
+
+      // Calcular porcentaje actual para comparar
+      final currentPercentage = currentTotalQuestions > 0
+          ? (currentBestScore / currentTotalQuestions * 100).round()
+          : 0;
+      final newPercentage = (widget.correctAnswers / widget.totalQuestions * 100).round();
+
+      print('Puntaje actual: $currentBestScore/$currentTotalQuestions ($currentPercentage%)');
+      print('Nuevo puntaje: ${widget.correctAnswers}/${widget.totalQuestions} ($newPercentage%)');
+
+      // ✅ VALIDACIÓN PREVIA: Verificar ANTES de llamar al backend si realmente es mejor
+      final isActuallyBetter = newPercentage > currentPercentage ||
+          (newPercentage == currentPercentage && widget.correctAnswers > currentBestScore);
+
+      if (!isActuallyBetter) {
+        print('❌ Puntaje no es mejor, no se actualiza ni muestra notificación');
+        setState(() {
+          _isNewBest = false;
+          _isSavingScore = false;
+        });
+        return; // ← SALIR TEMPRANO si no es mejor
+      }
+
+      // Solo llamar al backend si realmente es mejor
       final isNewBest = await profileViewModel.updateBestScore(widget.correctAnswers, widget.totalQuestions);
 
+      // ✅ TRIPLE VALIDACIÓN: Backend + cálculo local + valor explícito
+      final shouldShowNotification = isNewBest && isActuallyBetter;
+
       setState(() {
-        _isNewBest = isNewBest;
+        _isNewBest = shouldShowNotification;
       });
 
-      if (isNewBest) {
+      if (shouldShowNotification) {
+        print('✅ Mostrando notificación de nuevo récord');
         _showNewBestDialog(context);
+      } else {
+        print('❌ No se muestra notificación - no es un récord real');
       }
     } catch (e) {
       print('Error saving score: $e');

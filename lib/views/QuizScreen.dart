@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../viewmodels/quiz_viewmodel.dart';
+import '../services/audio_service.dart';  // Importar el servicio de audio
 import 'ResultsScreen.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -7,8 +8,9 @@ class QuizScreen extends StatefulWidget {
   _QuizScreenState createState() => _QuizScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
+class _QuizScreenState extends State<QuizScreen> with WidgetsBindingObserver {
   final QuizViewModel viewModel = QuizViewModel();
+  final AudioService _audioService = AudioService();
   String? selectedAnswer;
   bool showFeedback = false;
   bool isCorrect = false;
@@ -22,6 +24,66 @@ class _QuizScreenState extends State<QuizScreen> {
   void initState() {
     super.initState();
     startTime = DateTime.now();
+    WidgetsBinding.instance.addObserver(this);
+    _initializeAudio();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _stopBackgroundMusic();
+    super.dispose();
+  }
+
+  // Manejar cambios en el ciclo de vida de la app
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+        _audioService.pauseBackgroundMusic();
+        break;
+      case AppLifecycleState.resumed:
+        if (mounted) {
+          _audioService.resumeBackgroundMusic();
+        }
+        break;
+      case AppLifecycleState.detached:
+        _audioService.dispose();
+        break;
+      default:
+        break;
+    }
+  }
+
+  // Inicializar y comenzar la música de fondo
+  // Future<void> _initializeAudio() async {
+  //   try {
+  //     await _audioService.init();
+  //     await _audioService.playBackgroundMusic();
+  //   } catch (e) {
+  //     print('Error al inicializar audio: $e');
+  //   }
+  // }
+
+  Future<void> _initializeAudio() async {
+    try {
+      await _audioService.init();
+      // Iniciar la música y actualizar la UI inmediatamente
+      await _audioService.playBackgroundMusic();
+
+      // Forzar actualización de la UI para mostrar el ícono correcto
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      print('Error al inicializar audio: $e');
+    }
+  }
+
+
+  // Detener música de fondo
+  Future<void> _stopBackgroundMusic() async {
+    await _audioService.stopBackgroundMusic();
   }
 
   void _submitAnswer(String answer) {
@@ -45,28 +107,33 @@ class _QuizScreenState extends State<QuizScreen> {
           showFeedback = false;
         });
       } else {
-        // Quiz terminado - navegar a pantalla de resultados
+        // Quiz terminado - detener música y navegar a pantalla de resultados
         _navigateToResults();
       }
     });
   }
 
-  void _navigateToResults() {
+  void _navigateToResults() async {
+    // Detener la música de fondo antes de navegar
+    await _stopBackgroundMusic();
+
     final endTime = DateTime.now();
     final duration = endTime.difference(startTime);
     final timeElapsed = _formatDuration(duration);
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => ResultsScreen(
-          correctAnswers: correctAnswersCount,
-          totalQuestions: viewModel.questions.length,
-          timeElapsed: timeElapsed,
-          quizViewModel: viewModel,
-          answerHistory: answerHistory,
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => ResultsScreen(
+            correctAnswers: correctAnswersCount,
+            totalQuestions: viewModel.questions.length,
+            timeElapsed: timeElapsed,
+            quizViewModel: viewModel,
+            answerHistory: answerHistory,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   String _formatDuration(Duration duration) {
@@ -126,8 +193,33 @@ class _QuizScreenState extends State<QuizScreen> {
       appBar: AppBar(
         backgroundColor: Color(0xFF353535),
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Botón de control de música MEJORADO con mejor lógica
+            StatefulBuilder(
+              builder: (context, setIconState) {
+                return IconButton(
+                  icon: Icon(
+                    _audioService.isMusicEnabled && _audioService.isPlaying
+                        ? Icons.volume_up
+                        : Icons.volume_off,
+                    color: _audioService.isMusicEnabled && _audioService.isPlaying
+                        ? Color(0xFF00BCD4)
+                        : Colors.grey,
+                  ),
+                  onPressed: () async {
+                    // Usar el método para respuesta rápida
+                    await _audioService.toggleMusicFromButton();
+
+                    // Actualizar tanto el ícono como la UI principal
+                    setIconState(() {});
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  },
+                );
+              },
+            ),
             Image.asset(
               'assets/logo_noesis_game.png',
               height: screenWidth > 600 ? 50 : 40,
@@ -458,8 +550,9 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop(); // Cerrar dialogo
+                await _stopBackgroundMusic(); // Detener música
                 Navigator.of(context).pop(); // Salir del quiz
               },
               child: Text(

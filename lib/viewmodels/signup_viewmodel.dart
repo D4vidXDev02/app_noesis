@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 class SignupViewModel with ChangeNotifier {
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
+  String username = '';  // NUEVO CAMPO
   String email = '';
   String password = '';
 
@@ -16,7 +17,8 @@ class SignupViewModel with ChangeNotifier {
     notifyListeners();
 
     try {
-      await _apiService.registrarUsuario(email, password);
+      // Llamada actualizada con username
+      await _apiService.registrarUsuario(username, email, password);
 
       _isLoading = false;
       notifyListeners();

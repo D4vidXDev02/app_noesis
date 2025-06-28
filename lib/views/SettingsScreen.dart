@@ -12,7 +12,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _passwordFormKey = GlobalKey<FormState>();
 
   // Controlador para editar perfil (solo email)
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
 
   // Controladores para cambiar contraseña
   final _newPasswordController = TextEditingController();
@@ -31,28 +31,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
   void _loadUserData() {
-    final userEmail = UserSessionService().currentUserEmail;
+    // CAMBIO: Cargar username en lugar de email
+    final username = UserSessionService().currentUsername;
 
-    if (userEmail != null) {
-      _emailController.text = userEmail;
+    if (username != null) {
+      _usernameController.text = username;
     }
   }
 
-  String? _validateEmail(String? value) {
+  String? _validateUsername(String? value) {
     if (value == null || value.isEmpty) {
-      return 'El correo electrónico es requerido';
+      return 'El nombre de usuario es requerido';
     }
 
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Ingresa un correo electrónico válido';
+    if (value.length < 3) {
+      return 'El username debe tener al menos 3 caracteres';
+    }
+
+    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
+      return 'Solo se permiten letras, números y guiones bajos';
     }
 
     return null;
@@ -78,6 +82,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return null;
   }
 
+  // Future<void> _saveProfileChanges() async {
+  //   if (!_formKey.currentState!.validate()) return;
+  //
+  //   setState(() {
+  //     _isLoadingProfile = true;
+  //   });
+  //
+  //   try {
+  //     // Obtener email actual (no cambiará)
+  //     final currentEmail = UserSessionService().currentUserEmail;
+  //     if (currentEmail == null) {
+  //       throw Exception('No hay usuario logueado');
+  //     }
+  //
+  //     // CORRECCIÓN: Pasar tanto el email actual como el nuevo username
+  //     final result = await ApiService.updateUserProfile(
+  //       currentEmail,              // Email actual (no cambia)
+  //       _usernameController.text,  // Nuevo username
+  //       currentEmail,              // Email nuevo (igual al actual)
+  //     );
+  //
+  //     if (result['success']) {
+  //       // Actualizar la sesión del usuario con el nuevo username
+  //       UserSessionService().setCurrentUser(currentEmail, _usernameController.text);
+  //       _showSuccessSnackBar('Perfil actualizado correctamente');
+  //     } else {
+  //       _showErrorSnackBar(result['message'] ?? 'Error al actualizar el perfil');
+  //     }
+  //   } catch (e) {
+  //     _showErrorSnackBar('Error al actualizar el perfil: $e');
+  //   } finally {
+  //     setState(() {
+  //       _isLoadingProfile = false;
+  //     });
+  //   }
+  // }
+
   Future<void> _saveProfileChanges() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -91,16 +132,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         throw Exception('No hay usuario logueado');
       }
 
+      // Ahora solo necesitas pasar 2 parámetros
       final result = await ApiService.updateUserProfile(
-        currentEmail,
-        _emailController.text,
+        currentEmail,              // Email actual
+        _usernameController.text,  // Nuevo username
       );
 
       if (result['success']) {
-        // Actualizar la sesión del usuario si cambió el email
-        if (_emailController.text != currentEmail) {
-          UserSessionService().setCurrentUser(_emailController.text);
-        }
+        // Actualizar la sesión del usuario con el nuevo username
+        UserSessionService().setCurrentUser(currentEmail, _usernameController.text);
         _showSuccessSnackBar('Perfil actualizado correctamente');
       } else {
         _showErrorSnackBar(result['message'] ?? 'Error al actualizar el perfil');
@@ -402,16 +442,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         children: [
           TextFormField(
-            controller: _emailController,
+            controller: _usernameController,  // CAMBIO: de _emailController
             decoration: InputDecoration(
-              labelText: 'Correo electrónico',
-              prefixIcon: Icon(Icons.email),
+              labelText: 'Nombre de usuario',  // CAMBIO: de 'Correo electrónico'
+              prefixIcon: Icon(Icons.person),  // CAMBIO: de Icons.email
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            keyboardType: TextInputType.emailAddress,
-            validator: _validateEmail,
+            keyboardType: TextInputType.text,  // CAMBIO: de TextInputType.emailAddress
+            validator: _validateUsername,  // CAMBIO: de _validateEmail
           ),
           SizedBox(height: 20),
           SizedBox(

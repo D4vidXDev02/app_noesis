@@ -3,8 +3,10 @@ import 'package:http/http.dart' as http;
 import '../models/usuario.dart';
 
 class ApiService {
+  static const String baseUrl = 'https://noesis-backend-17il.onrender.com';
+
   Future<List<Usuario>> fetchUsuarios() async {
-    final response = await http.get(Uri.parse('https://backend-noesis.onrender.com/usuarios'));
+    final response = await http.get(Uri.parse('$baseUrl/usuarios'));
     if (response.statusCode == 200) {
       List jsonData = json.decode(response.body);
       return jsonData.map((e) => Usuario.fromJson(e)).toList();
@@ -14,13 +16,14 @@ class ApiService {
   }
 
   // Registrar un nuevo usuario en el sistema
-  Future<bool> registrarUsuario(String email, String password) async {
+  Future<bool> registrarUsuario(String username, String email, String password) async {
     final response = await http.post(
-      Uri.parse('https://backend-noesis.onrender.com/usuarios/registro'),
+      Uri.parse('$baseUrl/usuarios/registro'),
       headers: {
         'Content-Type': 'application/json',
       },
       body: json.encode({
+        'username': username,  // NUEVO CAMPO
         'email': email,
         'password': password,
       }),
@@ -40,7 +43,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getBestScore(String email) async {
     try {
       final response = await http.get(
-        Uri.parse('https://backend-noesis.onrender.com/usuarios/$email/puntajes'),
+        Uri.parse('$baseUrl/usuarios/$email/puntajes'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -73,7 +76,7 @@ class ApiService {
       ) async {
     try {
       final response = await http.post(
-        Uri.parse('https://backend-noesis.onrender.com/usuarios/$email/puntajes'),
+        Uri.parse('$baseUrl/usuarios/$email/puntajes'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'puntaje_obtenido': puntajeObtenido,
@@ -85,15 +88,20 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        // Asegura que los datos devueltos sean un Map válido
         final responseData = data is Map<String, dynamic> ? data : <String, dynamic>{};
-
-        // Establece valor por defecto si no viene en la respuesta
-        responseData['is_new_best'] ??= true; // Default to true if not specified
+        final innerData = responseData['data'] as Map<String, dynamic>? ?? <String, dynamic>{};
 
         return {
           'success': true,
-          'data': responseData
+          'data': {
+            'message': responseData['message'] ?? 'Puntaje actualizado',
+            'is_new_best': innerData['is_new_best'] ?? false,  // ← LEER DEL LUGAR CORRECTO
+            'puntaje_obtenido': innerData['puntaje_obtenido'] ?? puntajeObtenido,
+            'puntaje_total': innerData['puntaje_total'] ?? puntajeTotal,
+            'nivel': innerData['nivel'] ?? nivel,
+            'nivel_original': innerData['nivel_original'] ?? nivel,
+            'ml_enhanced': innerData['ml_enhanced'] ?? false,
+          }
         };
       } else {
         return {
@@ -115,7 +123,7 @@ class ApiService {
       ) async {
     try {
       final response = await http.post(
-        Uri.parse('https://backend-noesis.onrender.com/modelo/predict'),
+        Uri.parse('$baseUrl/modelo/predict'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'puntaje_obtenido': puntajeObtenido,
@@ -146,7 +154,7 @@ class ApiService {
   static Future<Map<String, dynamic>> predictUserEnglishLevel(String email) async {
     try {
       final response = await http.get(
-        Uri.parse('https://backend-noesis.onrender.com/usuarios/$email/puntajes/modelo/predict'),
+        Uri.parse('$baseUrl/usuarios/$email/puntajes/modelo/predict'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -174,7 +182,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getUserModelStats(String email) async {
     try {
       final response = await http.get(
-        Uri.parse('https://backend-noesis.onrender.com/usuarios/$email/puntajes/modelo/stats'),
+        Uri.parse('$baseUrl/usuarios/$email/puntajes/modelo/stats'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -200,16 +208,18 @@ class ApiService {
   // Actualizar perfil del usuario
   static Future<Map<String, dynamic>> updateUserProfile(
       String currentEmail,
-      String newEmail
+      String newUsername
       ) async {
     try {
       final response = await http.put(
-        Uri.parse('https://backend-noesis.onrender.com/usuarios/$currentEmail/perfil'),
+        Uri.parse('$baseUrl/usuarios/$currentEmail/perfil'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'email': newEmail,
+          'username': newUsername,
+          'email': currentEmail,  // Mantener el email igual
         }),
       );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return {
@@ -220,7 +230,12 @@ class ApiService {
         final data = json.decode(response.body);
         return {
           'success': false,
-          'message': data['message'] ?? 'Error al actualizar perfil'
+          'message': data['detail'] ?? 'Error al actualizar perfil'
+        };
+      } else if (response.statusCode == 422) {
+        return {
+          'success': false,
+          'message': 'Datos inválidos. Verifica username y email.'
         };
       } else {
         return {
@@ -236,7 +251,6 @@ class ApiService {
     }
   }
 
-
 // Cambiar contraseña del usuario
   static Future<Map<String, dynamic>> changeUserPassword(
       String email,
@@ -244,7 +258,7 @@ class ApiService {
       ) async {
     try {
       final response = await http.put(
-        Uri.parse('https://backend-noesis.onrender.com/usuarios/$email/password'),
+        Uri.parse('$baseUrl/usuarios/$email/password'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'new_password': newPassword,
@@ -280,7 +294,7 @@ class ApiService {
   static Future<Map<String, dynamic>> deleteUserAccount(String email) async {
     try {
       final response = await http.delete(
-        Uri.parse('https://backend-noesis.onrender.com/usuarios/$email'),
+        Uri.parse('$baseUrl/usuarios/$email'),
         headers: {'Content-Type': 'application/json'},
       );
 

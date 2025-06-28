@@ -11,8 +11,7 @@ import 'TheVerbCanScreen.dart';
 import 'QuizScreen.dart';
 import 'ProfileScreen.dart';
 import 'SettingsScreen.dart';
-
-
+import '../services/audio_service.dart';
 
 class MenuScreen extends StatefulWidget {
   @override
@@ -24,6 +23,8 @@ class _MenuScreenState extends State<MenuScreen> {
   int currentBottomNavIndex = 0;
   bool isLoadingFavorites = false;
   String? currentUserEmail;
+
+  final AudioService _audioService = AudioService();
 
   // Controlador para el campo de búsqueda
   final TextEditingController _searchController = TextEditingController();
@@ -575,13 +576,14 @@ class _MenuScreenState extends State<MenuScreen> {
                     height: 300,
                     child: Center(
                       child: ElevatedButton.icon(
-                        icon: Icon(Icons.play_arrow),
+                        icon: Icon(Icons.play_arrow, color: Colors.white),
                         label: Text(
                           'Start Game',
                           style: TextStyle(
                             fontFamily: 'Nunito',
                             fontWeight: FontWeight.bold,
                             fontSize: isTablet ? 24 : 20,
+                            color: Colors.white,
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
@@ -594,7 +596,11 @@ class _MenuScreenState extends State<MenuScreen> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
+                          // Inicializar el servicio de audio
+                          await _audioService.init();
+
+                          // Navegar al quiz (la música se iniciará automáticamente en QuizScreen)
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => QuizScreen()),

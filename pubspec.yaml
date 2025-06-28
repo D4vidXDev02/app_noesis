@@ -62,6 +62,7 @@ flutter:
     - assets/audios/She_can_dance.mp3
     - assets/audios/We_can_help.mp3
     - assets/audios/They_can_come.mp3
+    - assets/audios/music_game.mp3
 
   fonts:
     - family: Nunito

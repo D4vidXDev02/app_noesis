@@ -8,9 +8,11 @@ class LogupScreen extends StatefulWidget {
 }
 
 class _LogupScreenState extends State<LogupScreen> {
+  TextEditingController _usernameController = TextEditingController();  // NUEVO CONTROLLER
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
+  String _usernameErrorMessage = '';
   String _emailErrorMessage = '';
   String _passwordErrorMessage = '';
 
@@ -22,6 +24,27 @@ class _LogupScreenState extends State<LogupScreen> {
   void initState() {
     super.initState();
     _signupViewModel = SignupViewModel();
+  }
+
+  void _validateUsername() {
+    String username = _usernameController.text.trim();
+    if (username.isEmpty) {
+      setState(() {
+        _usernameErrorMessage = 'Ingrese un nombre de usuario';
+      });
+    } else if (username.length < 3) {
+      setState(() {
+        _usernameErrorMessage = 'El nombre de usuario debe tener al menos 3 caracteres';
+      });
+    } else if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username)) {
+      setState(() {
+        _usernameErrorMessage = 'Solo se permiten letras, números y guiones bajos';
+      });
+    } else {
+      setState(() {
+        _usernameErrorMessage = '';
+      });
+    }
   }
 
   void _validateEmail() {
@@ -65,15 +88,19 @@ class _LogupScreenState extends State<LogupScreen> {
   // Función para manejar el registro
   Future<void> _handleSignup() async {
     // Validar campos antes de proceder
+    _validateUsername();  // NUEVA VALIDACIÓN
     _validateEmail();
     _validatePassword();
 
     // Si hay errores, no proceder
-    if (_emailErrorMessage.isNotEmpty || _passwordErrorMessage.isNotEmpty) {
+    if (_usernameErrorMessage.isNotEmpty ||
+        _emailErrorMessage.isNotEmpty ||
+        _passwordErrorMessage.isNotEmpty) {
       return;
     }
 
     // Actualizar los valores en la capa de ViewModel
+    _signupViewModel.username = _usernameController.text.trim();
     _signupViewModel.email = _emailController.text.trim();
     _signupViewModel.password = _passwordController.text.trim();
 
@@ -290,6 +317,49 @@ class _LogupScreenState extends State<LogupScreen> {
 
                           SizedBox(height: screenHeight * 0.03),
 
+                          Container(
+                            width: fieldWidth,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextField(
+                                  controller: _usernameController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Username',
+                                    labelStyle: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: isTablet ? 16 : 14,
+                                    ),
+                                    border: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: Color(0xFFC96B0D)),
+                                    ),
+                                    contentPadding: EdgeInsets.symmetric(vertical: 12),
+                                  ),
+                                  style: TextStyle(fontSize: isTablet ? 16 : 14),
+                                  onChanged: (value) {
+                                    _validateUsername();
+                                  },
+                                ),
+                                if (_usernameErrorMessage.isNotEmpty)
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 5),
+                                    child: Text(
+                                      _usernameErrorMessage,
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontSize: isTablet ? 14 : 12,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: screenHeight * 0.025),
+
                           // Campo de correo electrónico
                           Container(
                             width: fieldWidth,
@@ -478,6 +548,7 @@ class _LogupScreenState extends State<LogupScreen> {
 
   @override
   void dispose() {
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();

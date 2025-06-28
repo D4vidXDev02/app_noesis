@@ -256,7 +256,7 @@ class QuizViewModel {
     _selectRandomQuestions(); // Seleccionar nuevas preguntas aleatorias al reiniciar
   }
 
-  // Metodo para obtener estadísticas del banco de preguntas
+  // Metodo mejorado para obtener estadísticas del banco de preguntas
   Map<String, int> getQuestionStats() {
     int verbToBe = 0;
     int presentSimple = 0;
@@ -264,17 +264,27 @@ class QuizViewModel {
     int verbCan = 0;
 
     // Contar preguntas por categoría en las preguntas seleccionadas
-    for (var question in _selectedQuestions) {
-      String questionText = question.question.toLowerCase();
-      if (questionText.contains('___') &&
-          (question.options.contains('is') || question.options.contains('are') || question.options.contains('am'))) {
+    for (int i = 0; i < _selectedQuestions.length; i++) {
+      var question = _selectedQuestions[i];
+
+      // Determinar categoría basándose en el índice original en _allQuestions
+      int originalIndex = _allQuestions.indexWhere(
+              (q) => q.question == question.question &&
+              q.correctAnswer == question.correctAnswer
+      );
+
+      if (originalIndex >= 0 && originalIndex <= 9) {
+        // Verb To Be (preguntas 0-9)
         verbToBe++;
-      } else if (question.options.contains('can')) {
-        verbCan++;
-      } else if (question.options.contains('will have')) {
-        futurePerfect++;
-      } else {
+      } else if (originalIndex >= 10 && originalIndex <= 19) {
+        // Present Simple (preguntas 10-19)
         presentSimple++;
+      } else if (originalIndex >= 20 && originalIndex <= 29) {
+        // Future Perfect (preguntas 20-29)
+        futurePerfect++;
+      } else if (originalIndex >= 30 && originalIndex <= 39) {
+        // The Verb Can (preguntas 30-39)
+        verbCan++;
       }
     }
 
@@ -282,7 +292,7 @@ class QuizViewModel {
       'Verb To Be': verbToBe,
       'Present Simple': presentSimple,
       'Future Perfect': futurePerfect,
-      'Verb Can': verbCan,
+      'The Verb Can': verbCan,
     };
   }
 }
