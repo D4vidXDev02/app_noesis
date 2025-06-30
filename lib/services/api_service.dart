@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/usuario.dart';
+import '../models/teacher.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://noesis-backend-17il.onrender.com';
+  static const String baseUrl = 'https://backend-noesis-1.onrender.com';
 
   Future<List<Usuario>> fetchUsuarios() async {
     final response = await http.get(Uri.parse('$baseUrl/usuarios'));
@@ -312,6 +313,186 @@ class ApiService {
         return {
           'success': false,
           'message': 'Error al eliminar cuenta'
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e'
+      };
+    }
+  }
+
+  // Obtener lista de docentes
+  Future<List<Teacher>> fetchTeachers() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/docentes'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        List jsonData = json.decode(response.body);
+        return jsonData.map((e) => Teacher.fromJson(e)).toList();
+      } else {
+        throw Exception('Error al cargar docentes: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de conexión: $e');
+    }
+  }
+
+// Registrar un nuevo docente
+  Future<Map<String, dynamic>> registrarDocente(String username, String email, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/docentes/registro'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'username': username,
+          'email': email,
+          'password': password,
+          'institucion': 'CCJCALLAO',
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': 'Docente registrado exitosamente'
+        };
+      } else if (response.statusCode == 400) {
+        final errorData = json.decode(response.body);
+        return {
+          'success': false,
+          'message': errorData['detail'] ?? 'Error al registrar docente'
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Error del servidor: ${response.statusCode}'
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e'
+      };
+    }
+  }
+
+// Login de docente
+  Future<Map<String, dynamic>> loginDocente(String email, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/docentes/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': 'Login exitoso'
+        };
+      } else if (response.statusCode == 404) {
+        return {
+          'success': false,
+          'message': 'Docente no encontrado'
+        };
+      } else if (response.statusCode == 401) {
+        return {
+          'success': false,
+          'message': 'Contraseña incorrecta'
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Error del servidor: ${response.statusCode}'
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e'
+      };
+    }
+  }
+
+// Obtener información de docente
+  Future<Teacher?> getTeacherInfo(String email) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/docentes/$email'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return Teacher.fromJson({
+          'username': data['username'],
+          'email': data['email'],
+          'password': '', // No se devuelve la contraseña
+          'institucion': data['institucion'],
+        });
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Error obteniendo info de docente: $e');
+      return null;
+    }
+  }
+
+  // Obtener estadísticas generales de estudiantes
+  static Future<Map<String, dynamic>> getStudentsStats() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/docentes/estadisticas/estudiantes'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return {
+          'success': true,
+          'data': data
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Error al obtener estadísticas'
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e'
+      };
+    }
+  }
+
+// Obtener progreso detallado de estudiantes
+  static Future<Map<String, dynamic>> getStudentsProgress() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/docentes/progreso/estudiantes'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return {
+          'success': true,
+          'data': data
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Error al obtener progreso'
         };
       }
     } catch (e) {

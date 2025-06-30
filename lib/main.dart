@@ -6,6 +6,9 @@ import 'views/LoginScreen.dart';
 import 'views/MenuScreen.dart';
 import 'views/LogupScreen.dart';
 import 'viewmodels/profile_viewmodel.dart';
+import 'views/TeacherLoginScreen.dart';
+import 'views/TeacherSignupScreen.dart';
+import 'views/TeacherDashboardScreen.dart';
 
 void main() {
   runApp(
@@ -63,6 +66,9 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginScreen(),
         '/menu': (context) => MenuScreen(),
         '/logup': (context) => LogupScreen(),
+        '/teacher-login': (context) => TeacherLoginScreen(),    // NUEVO
+        '/teacher-signup': (context) => TeacherSignupScreen(),  // NUEVO
+        '/teacher-menu': (context) => TeacherDashboardScreen(),
       },
     );
   }
@@ -137,6 +143,36 @@ class MyHomePage extends StatelessWidget {
                           fontSize: 16,
                           color: Colors.red, // Rojo
                           decoration: TextDecoration.underline, // Subrayado
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 90, // Ajustar según el espaciado deseado
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/teacher-login');
+                },
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "¿Eres docente? ",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                      TextSpan(
+                        text: "Activar cuenta",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFFC96B0D), // Color naranja
+                          decoration: TextDecoration.underline,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

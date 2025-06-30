@@ -96,51 +96,7 @@ class ProfileViewModel with ChangeNotifier {
       notifyListeners();
     }
   }
-
-  // Future<bool> updateBestScore(int correctAnswers, int totalQuestions) async {
-  //   if (!isLoggedIn || userEmail == null) return false;
-  //
-  //   try {
-  //     // Calcular nivel básico como fallback
-  //     final percentage = (correctAnswers / totalQuestions * 100).round();
-  //     String fallbackLevel = _calculateLevel(percentage);
-  //
-  //     // Actualizar puntaje - el backend ya incluye ML automáticamente
-  //     final response = await ApiService.updateBestScore(
-  //         userEmail!,
-  //         correctAnswers,
-  //         totalQuestions,
-  //         fallbackLevel
-  //     );
-  //
-  //     if (response['success']) {
-  //       final isNewBest = response['data']?['is_new_best'] ?? false;
-  //       final mlEnhanced = response['data']?['ml_enhanced'] ?? false;
-  //
-  //       if (isNewBest || response['data']?['is_new_best'] == null) {
-  //         _puntajeObtenido = correctAnswers;
-  //         _puntajeTotal = totalQuestions;
-  //         _nivel = response['data']?['nivel'] ?? fallbackLevel;
-  //
-  //         // Refrescar predicción ML después de actualizar
-  //         await refreshMLPrediction();
-  //
-  //         notifyListeners();
-  //
-  //         if (mlEnhanced) {
-  //           print('Nivel mejorado por ML: ${_nivel}');
-  //         }
-  //
-  //         return true;
-  //       }
-  //     }
-  //   } catch (e) {
-  //     print('Error updating best score: $e');
-  //   }
-  //
-  //   return false;
-  // }
-
+  
   Future<bool> updateBestScore(int correctAnswers, int totalQuestions) async {
     if (!isLoggedIn || userEmail == null) return false;
 

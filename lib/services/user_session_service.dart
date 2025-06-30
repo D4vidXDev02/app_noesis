@@ -6,21 +6,43 @@ class UserSessionService {
   String? _currentUserEmail;
   String? _currentUsername;
 
+  // Agregar estas propiedades a la clase:
+  String? _currentUserType; // 'student' o 'teacher'
+  String? _currentInstitution; // Para docentes
+
+
   // Getters
   String? get currentUserEmail => _currentUserEmail;
   String? get currentUsername => _currentUsername;
-  bool get isLoggedIn => _currentUserEmail != null;
+  String? get currentUserType => _currentUserType;
+  String? get currentInstitution => _currentInstitution;
 
-  // Establecer el usuario logueado
-  void setCurrentUser(String email, String username) {
+  bool get isLoggedIn => _currentUserEmail != null;
+  bool get isStudent => _currentUserType == 'student';
+  bool get isTeacher => _currentUserType == 'teacher';
+
+  // Setter para estudiantes
+  void setCurrentUser(String email, String username, {String userType = 'student'}) {
     _currentUserEmail = email;
-    _currentUsername = username;  // Ya no se extrae del email
+    _currentUsername = username;
+    _currentUserType = userType;
+    _currentInstitution = null; // Solo para docentes
+  }
+
+  // Setter para docentes
+  void setCurrentTeacher(String email, String username, String institution) {
+    _currentUserEmail = email;
+    _currentUsername = username;
+    _currentUserType = 'teacher';
+    _currentInstitution = institution;
   }
 
   // Metodo para cerrar sesión
   void logout() {
     _currentUserEmail = null;
     _currentUsername = null;
+    _currentUserType = null;
+    _currentInstitution = null;
   }
 
   // Obtener el email del usuario actual
