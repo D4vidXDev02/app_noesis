@@ -88,6 +88,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       value: _viewModel,
       child: Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Text(
             'Panel Docente',
             style: TextStyle(
@@ -770,7 +771,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               ),
             )
           else
-            ...viewModel.students.map((student) => _buildStudentItem(student, config)).toList(),
+            // ...viewModel.students.map((student) => _buildStudentItem(student, config)).toList(),
+            ...(viewModel.students.toList()
+              ..sort((a, b) => a.username.toLowerCase().compareTo(b.username.toLowerCase())))
+                .map((student) => _buildStudentItem(student, config)).toList(),
         ],
       ),
     );
