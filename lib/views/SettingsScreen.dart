@@ -11,7 +11,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _formKey = GlobalKey<FormState>();
   final _passwordFormKey = GlobalKey<FormState>();
 
-  // Controlador para editar perfil (solo email)
   final _usernameController = TextEditingController();
 
   // Controladores para cambiar contraseña
@@ -38,7 +37,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _loadUserData() {
-    // CAMBIO: Cargar username en lugar de email
     final username = UserSessionService().currentUsername;
 
     if (username != null) {
@@ -82,43 +80,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return null;
   }
 
-  // Future<void> _saveProfileChanges() async {
-  //   if (!_formKey.currentState!.validate()) return;
-  //
-  //   setState(() {
-  //     _isLoadingProfile = true;
-  //   });
-  //
-  //   try {
-  //     // Obtener email actual (no cambiará)
-  //     final currentEmail = UserSessionService().currentUserEmail;
-  //     if (currentEmail == null) {
-  //       throw Exception('No hay usuario logueado');
-  //     }
-  //
-  //     // CORRECCIÓN: Pasar tanto el email actual como el nuevo username
-  //     final result = await ApiService.updateUserProfile(
-  //       currentEmail,              // Email actual (no cambia)
-  //       _usernameController.text,  // Nuevo username
-  //       currentEmail,              // Email nuevo (igual al actual)
-  //     );
-  //
-  //     if (result['success']) {
-  //       // Actualizar la sesión del usuario con el nuevo username
-  //       UserSessionService().setCurrentUser(currentEmail, _usernameController.text);
-  //       _showSuccessSnackBar('Perfil actualizado correctamente');
-  //     } else {
-  //       _showErrorSnackBar(result['message'] ?? 'Error al actualizar el perfil');
-  //     }
-  //   } catch (e) {
-  //     _showErrorSnackBar('Error al actualizar el perfil: $e');
-  //   } finally {
-  //     setState(() {
-  //       _isLoadingProfile = false;
-  //     });
-  //   }
-  // }
-
   Future<void> _saveProfileChanges() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -132,14 +93,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         throw Exception('No hay usuario logueado');
       }
 
-      // Ahora solo necesitas pasar 2 parámetros
       final result = await ApiService.updateUserProfile(
         currentEmail,              // Email actual
         _usernameController.text,  // Nuevo username
       );
 
       if (result['success']) {
-        // Actualizar la sesión del usuario con el nuevo username
         UserSessionService().setCurrentUser(currentEmail, _usernameController.text);
         _showSuccessSnackBar('Perfil actualizado correctamente');
       } else {
@@ -442,16 +401,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         children: [
           TextFormField(
-            controller: _usernameController,  // CAMBIO: de _emailController
+            controller: _usernameController,
             decoration: InputDecoration(
-              labelText: 'Nombre de usuario',  // CAMBIO: de 'Correo electrónico'
-              prefixIcon: Icon(Icons.person),  // CAMBIO: de Icons.email
+              labelText: 'Nombre de usuario',
+              prefixIcon: Icon(Icons.person),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            keyboardType: TextInputType.text,  // CAMBIO: de TextInputType.emailAddress
-            validator: _validateUsername,  // CAMBIO: de _validateEmail
+            keyboardType: TextInputType.text,
+            validator: _validateUsername,
           ),
           SizedBox(height: 20),
           SizedBox(

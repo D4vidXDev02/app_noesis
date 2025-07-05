@@ -29,17 +29,16 @@ class LoginViewModel with ChangeNotifier {
 
       final user = _usuarios.firstWhere(
             (u) => u.email == email && u.password == password,
-        orElse: () => Usuario(username: '', email: '', password: ''),  // CONSTRUCTOR ACTUALIZADO
+        orElse: () => Usuario(username: '', email: '', password: ''),
       );
 
       _isLoading = false;
       notifyListeners();
 
       if (user.email.isNotEmpty) {
-        // LLAMADA ACTUALIZADA - ahora pasa username directamente
         _sessionService.setCurrentUser(user.email, user.username);
         debugPrint("Login correcto para: ${user.email}");
-        debugPrint("Username: ${user.username}");  // Ahora viene del modelo
+        debugPrint("Username: ${user.username}");
         return true;
       } else {
         debugPrint("Credenciales incorrectas");

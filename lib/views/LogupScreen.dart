@@ -8,7 +8,7 @@ class LogupScreen extends StatefulWidget {
 }
 
 class _LogupScreenState extends State<LogupScreen> {
-  TextEditingController _usernameController = TextEditingController();  // NUEVO CONTROLLER
+  TextEditingController _usernameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
@@ -88,7 +88,7 @@ class _LogupScreenState extends State<LogupScreen> {
   // Función para manejar el registro
   Future<void> _handleSignup() async {
     // Validar campos antes de proceder
-    _validateUsername();  // NUEVA VALIDACIÓN
+    _validateUsername();
     _validateEmail();
     _validatePassword();
 

@@ -352,50 +352,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                             SizedBox(height: 8),
-                            // Badge del nivel
-                            // Container(
-                            //   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                            //   decoration: BoxDecoration(
-                            //     color: _getLevelColor(viewModel.nivel),
-                            //     borderRadius: BorderRadius.circular(16),
-                            //   ),
-                            //   child: Text(
-                            //     viewModel.nivel,
-                            //     style: TextStyle(
-                            //       fontFamily: 'Nunito',
-                            //       fontSize: 14,
-                            //       fontWeight: FontWeight.bold,
-                            //       color: Colors.white,
-                            //     ),
-                            //   ),
-                            // ),
-                            // Container(
-                            //   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                            //   decoration: BoxDecoration(
-                            //     color: _getLevelColor(viewModel.nivel),
-                            //     borderRadius: BorderRadius.circular(16),
-                            //   ),
-                            //   child: Row(
-                            //     mainAxisSize: MainAxisSize.min,
-                            //     children: [
-                            //       Icon(
-                            //         Icons.psychology, // Icono de IA/ML
-                            //         color: Colors.white,
-                            //         size: 14,
-                            //       ),
-                            //       SizedBox(width: 4),
-                            //       Text(
-                            //         '${viewModel.nivel} (ML)',
-                            //         style: TextStyle(
-                            //           fontFamily: 'Nunito',
-                            //           fontSize: 14,
-                            //           fontWeight: FontWeight.bold,
-                            //           color: Colors.white,
-                            //         ),
-                            //       ),
-                            //     ],
-                            //   ),
-                            // ),
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                               decoration: BoxDecoration(

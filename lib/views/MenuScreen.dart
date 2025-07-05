@@ -74,7 +74,7 @@ class _MenuScreenState extends State<MenuScreen> {
     super.initState();
     _loadUserSession();
 
-    // Agregar listener al controlador de búsqueda
+    //  listener al controlador de búsqueda
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text;

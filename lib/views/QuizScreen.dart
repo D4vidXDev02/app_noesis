@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../viewmodels/quiz_viewmodel.dart';
-import '../services/audio_service.dart';  // Importar el servicio de audio
+import '../services/audio_service.dart';
 import 'ResultsScreen.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -54,16 +54,6 @@ class _QuizScreenState extends State<QuizScreen> with WidgetsBindingObserver {
         break;
     }
   }
-
-  // Inicializar y comenzar la música de fondo
-  // Future<void> _initializeAudio() async {
-  //   try {
-  //     await _audioService.init();
-  //     await _audioService.playBackgroundMusic();
-  //   } catch (e) {
-  //     print('Error al inicializar audio: $e');
-  //   }
-  // }
 
   Future<void> _initializeAudio() async {
     try {
@@ -146,7 +136,7 @@ class _QuizScreenState extends State<QuizScreen> with WidgetsBindingObserver {
   // Metodo para calcular el porcentaje de progreso
   double get progressPercentage => (viewModel.currentIndex + 1) / viewModel.questions.length;
 
-  // Método para obtener dimensiones responsivas
+  // Metodo para obtener dimensiones responsivas
   double _getResponsiveWidth(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     if (screenWidth > 600) {
@@ -195,7 +185,7 @@ class _QuizScreenState extends State<QuizScreen> with WidgetsBindingObserver {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Botón de control de música MEJORADO con mejor lógica
+            // Botón de control de música
             StatefulBuilder(
               builder: (context, setIconState) {
                 return IconButton(
@@ -208,10 +198,9 @@ class _QuizScreenState extends State<QuizScreen> with WidgetsBindingObserver {
                         : Colors.grey,
                   ),
                   onPressed: () async {
-                    // Usar el método para respuesta rápida
+                    // metodo para respuesta rápida
                     await _audioService.toggleMusicFromButton();
 
-                    // Actualizar tanto el ícono como la UI principal
                     setIconState(() {});
                     if (mounted) {
                       setState(() {});

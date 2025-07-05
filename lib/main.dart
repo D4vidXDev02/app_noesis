@@ -66,8 +66,8 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginScreen(),
         '/menu': (context) => MenuScreen(),
         '/logup': (context) => LogupScreen(),
-        '/teacher-login': (context) => TeacherLoginScreen(),    // NUEVO
-        '/teacher-signup': (context) => TeacherSignupScreen(),  // NUEVO
+        '/teacher-login': (context) => TeacherLoginScreen(),
+        '/teacher-signup': (context) => TeacherSignupScreen(),
         '/teacher-menu': (context) => TeacherDashboardScreen(),
       },
     );
@@ -134,14 +134,14 @@ class MyHomePage extends StatelessWidget {
                         text: "Don't have an account? ",
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white, // Blanco
+                          color: Colors.white,
                         ),
                       ),
                       TextSpan(
                         text: "Sign Up",
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.red, // Rojo
+                          color: Colors.red,
                           decoration: TextDecoration.underline, // Subrayado
                           fontWeight: FontWeight.bold,
                         ),

@@ -31,7 +31,7 @@ class AudioService {
     _isInitialized = true;
   }
 
-  // Reproducir música de fondo (MEJORADO - actualiza estados inmediatamente)
+  // Reproducir música de fondo
   Future<void> playBackgroundMusic() async {
     if (!_isMusicEnabled || _backgroundPlayer == null) return;
 

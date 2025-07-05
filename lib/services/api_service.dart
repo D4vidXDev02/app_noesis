@@ -24,7 +24,7 @@ class ApiService {
         'Content-Type': 'application/json',
       },
       body: json.encode({
-        'username': username,  // NUEVO CAMPO
+        'username': username,
         'email': email,
         'password': password,
       }),
@@ -96,7 +96,7 @@ class ApiService {
           'success': true,
           'data': {
             'message': responseData['message'] ?? 'Puntaje actualizado',
-            'is_new_best': innerData['is_new_best'] ?? false,  // ← LEER DEL LUGAR CORRECTO
+            'is_new_best': innerData['is_new_best'] ?? false,
             'puntaje_obtenido': innerData['puntaje_obtenido'] ?? puntajeObtenido,
             'puntaje_total': innerData['puntaje_total'] ?? puntajeTotal,
             'nivel': innerData['nivel'] ?? nivel,

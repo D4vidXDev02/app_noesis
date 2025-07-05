@@ -269,7 +269,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          // Removido el mensaje "Gestiona y supervisa el progreso de tus estudiantes"
         ],
       ),
     );

@@ -6,10 +6,8 @@ class UserSessionService {
   String? _currentUserEmail;
   String? _currentUsername;
 
-  // Agregar estas propiedades a la clase:
   String? _currentUserType; // 'student' o 'teacher'
   String? _currentInstitution; // Para docentes
-
 
   // Getters
   String? get currentUserEmail => _currentUserEmail;

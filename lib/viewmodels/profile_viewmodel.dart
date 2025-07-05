@@ -96,7 +96,7 @@ class ProfileViewModel with ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   Future<bool> updateBestScore(int correctAnswers, int totalQuestions) async {
     if (!isLoggedIn || userEmail == null) return false;
 
@@ -104,13 +104,6 @@ class ProfileViewModel with ChangeNotifier {
       // Calcular nivel básico como fallback
       final percentage = (correctAnswers / totalQuestions * 100).round();
       String fallbackLevel = _calculateLevel(percentage);
-
-      // ✅ DEBUG: Mostrar estado actual antes de actualizar
-      print('=== ANTES DE ACTUALIZAR ===');
-      print('Puntaje actual guardado: $_puntajeObtenido/$_puntajeTotal');
-      print('Nuevo puntaje: $correctAnswers/$totalQuestions');
-      print('Porcentaje actual: ${(_puntajeObtenido / _puntajeTotal * 100).round()}%');
-      print('Porcentaje nuevo: $percentage%');
 
       // Actualizar puntaje - el backend ya incluye ML automáticamente
       final response = await ApiService.updateBestScore(
@@ -120,20 +113,12 @@ class ProfileViewModel with ChangeNotifier {
           fallbackLevel
       );
 
-      print('=== RESPUESTA DEL BACKEND ===');
-      print('Response completa: $response');
-
       if (response['success']) {
-        // ✅ CORRECCIÓN: Solo considerar como nuevo récord si está explícitamente marcado como tal
+        // Solo considerar como nuevo récord si está explícitamente marcado como tal
         final isNewBest = response['data']?['is_new_best'] == true;
         final mlEnhanced = response['data']?['ml_enhanced'] ?? false;
 
-        print('=== ANÁLISIS DE RESPUESTA ===');
-        print('is_new_best del backend: ${response['data']?['is_new_best']}');
-        print('is_new_best procesado: $isNewBest');
-        print('ml_enhanced: $mlEnhanced');
-
-        // ✅ CORRECCIÓN: Solo actualizar datos locales si realmente es un nuevo récord
+        // Solo actualizar datos locales si realmente es un nuevo récord
         if (isNewBest) {
           _puntajeObtenido = correctAnswers;
           _puntajeTotal = totalQuestions;
@@ -144,21 +129,13 @@ class ProfileViewModel with ChangeNotifier {
 
           notifyListeners();
 
-          if (mlEnhanced) {
-            print('Nivel mejorado por ML: ${_nivel}');
-          }
-
-          print('✅ ¡Nuevo récord establecido: $correctAnswers/$totalQuestions!');
-          return true; // ✅ Solo retorna true para récords reales
+          return true; // Solo retorna true para récords reales
         } else {
-          print('❌ Puntaje no supera el récord actual: $correctAnswers/$totalQuestions');
-          return false; // ✅ Retorna false cuando no es récord
+          return false; // Retorna false cuando no es récord
         }
-      } else {
-        print('❌ Error en respuesta del backend: ${response['message']}');
       }
     } catch (e) {
-      print('❌ Error updating best score: $e');
+      // Manejo silencioso de errores
     }
 
     return false;
